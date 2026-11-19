@@ -102,8 +102,13 @@ const map = L.map("map", {preferCanvas: true});
 const sat = L.tileLayer(
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   {maxZoom: 20, maxNativeZoom: 19, attribution: "Imagery: Esri, Maxar, Earthstar Geographics"}).addTo(map);
-const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {maxZoom: 19, attribution: "&copy; OpenStreetMap contributors"});
+// OSM tiles refuse pages opened from file:// (no Referer -> 403), Esri serves them
+const streets = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom: 20, maxNativeZoom: 19, attribution: "Esri, HERE, Garmin, &copy; OpenStreetMap contributors"});
+const labels = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom: 20, maxNativeZoom: 19});
 const colour = {map: "#2ecc71", interp: "#f39c12"};
 const layers = {footprints: L.layerGroup(), frames: L.layerGroup(), gt: L.layerGroup(), route: L.layerGroup()};
 let frames = [];
@@ -132,8 +137,9 @@ if (frames.length) {
   L.marker(frames[frames.length - 1]).bindTooltip("FINISH", {permanent: true}).addTo(map);
   map.fitBounds(L.latLngBounds(frames).pad(0.15));
 }
-L.control.layers({"Satellite": sat, "OpenStreetMap": osm},
-  {"Route": layers.route, "Frames": layers.frames, "Footprints": layers.footprints, "Ground truth": layers.gt},
+L.control.layers({"Satellite": sat, "Streets": streets},
+  {"Place names": labels, "Route": layers.route, "Frames": layers.frames, "Footprints": layers.footprints,
+   "Ground truth": layers.gt},
   {collapsed: false}).addTo(map);
 const info = L.control({position: "bottomleft"});
 info.onAdd = () => {
@@ -150,7 +156,7 @@ L.control.scale({imperial: false}).addTo(map);
 
 
 def write_web_map(geojson: dict, path: str | Path, title: str, summary: dict) -> None:
-    """Self-contained Leaflet page (data inlined): satellite / OSM base, route, frames with popups, GT."""
+    """Self-contained Leaflet page (data inlined): satellite / street base, route, frames with popups, GT."""
     html = (_HTML.replace("__TITLE__", title)
             .replace("__DATA__", json.dumps(geojson, separators=(",", ":")))
             .replace("__SUMMARY__", json.dumps(summary, ensure_ascii=False)))

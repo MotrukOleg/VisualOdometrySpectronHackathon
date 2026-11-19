@@ -75,6 +75,8 @@ $py = "E:\Anaconda\envs\MachineLearning\python.exe"
 & $py scripts/extract_frames.py video.mp4 --out data/video/frames --every 5
 & $py scripts/make_area.py --area lviv_old_town                       # будь-яка місцевість: мапа з тайлів + політ із GT
 & $py scripts/export_gps.py --run <run> --geo data/areas/<name>/geo.json   # lat/lon, GeoJSON, інтерактивна мапа
+& $py scripts/list_wayback.py --area lviv_old_town                    # архівні версії знімків району
+& $py scripts/make_area.py --area lviv_old_town --frames-from wayback:oldest   # кадри з архіву, мапа поточна
 ```
 
 **Будь-яка місцевість** (`src/vo/tiles.py`, `scripts/make_area.py`, райони — `configs/areas.yaml`): мапа з тайлів
@@ -84,6 +86,8 @@ Esri World Imagery на zoom 17 + та сама ділянка на zoom 19 дл
 `tiles.is_placeholder` їх відкидає, а `make_area.py` бере найдетальніший доступний zoom.
 `src/vo/gps.py` переводить траєкторію в lat/lon за `geo.json`, рахує похибку в метрах і пише GeoJSON та
 самодостатню Leaflet-сторінку `route_map.html`.
+`src/vo/wayback.py` — архів Esri Wayback (2014 → сьогодні, знімки від ~2008): провайдер `wayback:<release>` у
+`tiles.py`, `versions_at` знаходить версії з реально різними знімками, `capture_info` — дату зйомки й сенсор.
 
 ## Архітектура коду (`src/vo/`)
 

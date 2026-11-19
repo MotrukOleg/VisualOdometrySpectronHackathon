@@ -1,0 +1,5 @@
+# Speed baseline: ORB + brute-force Hamming + ratio test.
+base: baseline.yaml
+name: orb_bf_ransac
+features: {type: orb, max_keypoints: 5000}
+matching: {type: bf, ratio: 0.8}

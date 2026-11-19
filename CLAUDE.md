@@ -73,7 +73,14 @@ $py = "E:\Anaconda\envs\MachineLearning\python.exe"
 & $py scripts/run_experiment.py --config configs/baseline.yaml --set data.max_frames=50
 & $py scripts/run_benchmark.py --configs "configs/*.yaml"             # усі конфіги → experiments/summary.csv
 & $py scripts/extract_frames.py video.mp4 --out data/video/frames --every 5
+& $py scripts/make_area.py --area lviv_old_town                       # будь-яка місцевість: мапа з тайлів + політ із GT
 ```
+
+**Будь-яка місцевість** (`src/vo/tiles.py`, `scripts/make_area.py`, райони — `configs/areas.yaml`): мапа з тайлів
+Esri World Imagery на zoom 17 + та сама ділянка на zoom 19 для кадрів (масштаб 0.25, як у ТЗ) → `data/areas/<name>/`
+(`map.jpg`, `geo.json` з геоприв'язкою піксель ↔ lat/lon, `flight/frames`, `flight/gt.csv`). Тайли кешуються в
+`data/cache/tiles/`. Esri віддає заглушку «Map data not yet available» (HTTP 200) там, де немає знімків —
+`tiles.is_placeholder` їх відкидає, а `make_area.py` бере найдетальніший доступний zoom.
 
 ## Архітектура коду (`src/vo/`)
 

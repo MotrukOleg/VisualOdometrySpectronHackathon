@@ -1,0 +1,5 @@
+base: baseline.yaml
+name: superpoint_lightglue_magsac
+features: {type: superpoint, max_keypoints: 2048}
+matching: {type: lightglue, ratio: null}
+geometry: {estimator: magsac}

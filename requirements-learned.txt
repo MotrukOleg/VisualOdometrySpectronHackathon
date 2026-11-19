@@ -1,0 +1,5 @@
+# Learned features / matchers (GPU). Install torch first with the CUDA build matching the driver:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+kornia>=0.7
+lightglue @ git+https://github.com/cvg/LightGlue.git
+# XFeat is loaded via torch.hub (verlab/accelerated_features), SuperGlue from third_party/ (see CLAUDE.md)

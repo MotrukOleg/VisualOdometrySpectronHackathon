@@ -1,0 +1,4 @@
+base: baseline.yaml
+name: xfeat_magsac
+matching: {type: xfeat, params: {top_k: 4096}}
+geometry: {estimator: magsac}

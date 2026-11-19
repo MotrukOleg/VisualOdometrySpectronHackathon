@@ -6,6 +6,8 @@ top-left corner lies in global pixels, so any map pixel converts to lon/lat and 
 
 Tiles are cached on disk (`<cache>/<provider>/<z>/<x>/<y>.jpg`): a repeated run, or a larger area that
 overlaps a previous one, does not download them again.
+
+Providers: "esri" (current World Imagery) and "wayback:<release>" (an archived version of it, see vo.wayback).
 """
 from __future__ import annotations
 
@@ -33,8 +35,27 @@ PROVIDERS = {
         "attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
         "max_zoom": 19,
     },
+    "wayback": {
+        "url": "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/"
+               "MapServer/tile/{release}/{z}/{y}/{x}",
+        "attribution": "Esri World Imagery Wayback, Maxar, Earthstar Geographics",
+        "max_zoom": 19,
+    },
 }
 USER_AGENT = "VisualOdometrySpectronHackathon/0.1 (research)"
+
+
+def provider_info(provider: str) -> dict:
+    """URL template, attribution and max zoom of "esri" or "wayback:<release>"."""
+    name, _, release = provider.partition(":")
+    if name not in PROVIDERS:
+        raise ValueError(f"unknown provider {provider!r}; known: {', '.join(PROVIDERS)}")
+    info = dict(PROVIDERS[name])
+    if "{release}" in info["url"]:
+        if not release:
+            raise ValueError(f"{name} needs a release: '{name}:<id>' (scripts/list_wayback.py lists them)")
+        info["url"] = info["url"].replace("{release}", release)
+    return info
 
 
 def lonlat_to_px(lon, lat, z: int):
@@ -123,11 +144,11 @@ def is_placeholder(tile: np.ndarray) -> bool:
 
 def fetch_tile(provider: str, z: int, x: int, y: int, cache_dir: str | Path) -> np.ndarray | None:
     """One 256x256 BGR tile, from the disk cache or the server; None if there is no imagery."""
-    path = Path(cache_dir) / provider / str(z) / str(x) / f"{y}.jpg"
+    path = Path(cache_dir) / provider.replace(":", "_") / str(z) / str(x) / f"{y}.jpg"
     if path.exists():
         data = path.read_bytes()
     else:
-        data = _download(PROVIDERS[provider]["url"].format(z=z, x=x, y=y))
+        data = _download(provider_info(provider)["url"].format(z=z, x=x, y=y))
         if data is None:
             return None
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -136,24 +157,28 @@ def fetch_tile(provider: str, z: int, x: int, y: int, cache_dir: str | Path) -> 
     return None if tile is None or is_placeholder(tile) else tile
 
 
-def max_available_zoom(geo: GeoRef, z_max: int, cache_dir: str | Path = "data/cache/tiles", grid: int = 4) -> int:
-    """Highest zoom in [geo.zoom, z_max] with real imagery at a grid x grid set of points over the map box."""
+def max_available_zoom(geo: GeoRef, z_max: int, cache_dir: str | Path = "data/cache/tiles", grid: int = 4,
+                       provider: str | None = None) -> int:
+    """Highest zoom in [geo.zoom, z_max] with real imagery at a grid x grid set of points over the map box
+    (from `provider`, by default the map's own)."""
+    provider = provider or geo.provider
     us = (np.arange(grid) + 0.5) / grid * geo.width
     vs = (np.arange(grid) + 0.5) / grid * geo.height
-    for z in range(min(z_max, PROVIDERS[geo.provider]["max_zoom"]), geo.zoom, -1):
+    for z in range(min(z_max, provider_info(provider)["max_zoom"]), geo.zoom, -1):
         k = 2 ** (z - geo.zoom)
-        if all(fetch_tile(geo.provider, z, int((geo.x0 + u) * k) // TILE, int((geo.y0 + v) * k) // TILE, cache_dir)
+        if all(fetch_tile(provider, z, int((geo.x0 + u) * k) // TILE, int((geo.y0 + v) * k) // TILE, cache_dir)
                is not None for u in us for v in vs):
             return z
-        log.info("%s has no imagery at zoom %d here", geo.provider, z)
+        log.info("%s has no imagery at zoom %d here", provider, z)
     return geo.zoom
 
 
 def fetch_box(x0: int, y0: int, width: int, height: int, zoom: int, provider: str = "esri",
               cache_dir: str | Path = "data/cache/tiles", workers: int = 8) -> tuple[np.ndarray, GeoRef]:
     """Stitch the global-pixel box [x0, x0 + width) x [y0, y0 + height) at `zoom` into one BGR image."""
-    if zoom > PROVIDERS[provider]["max_zoom"]:
-        raise ValueError(f"{provider} has no tiles above zoom {PROVIDERS[provider]['max_zoom']}")
+    info = provider_info(provider)
+    if zoom > info["max_zoom"]:
+        raise ValueError(f"{provider} has no tiles above zoom {info['max_zoom']}")
     tx0, ty0 = x0 // TILE, y0 // TILE
     tx1, ty1 = (x0 + width - 1) // TILE, (y0 + height - 1) // TILE
     jobs = [(tx, ty) for ty in range(ty0, ty1 + 1) for tx in range(tx0, tx1 + 1)]
@@ -171,7 +196,7 @@ def fetch_box(x0: int, y0: int, width: int, height: int, zoom: int, provider: st
         log.warning("%d/%d tiles are missing at zoom %d (filled with grey)", missing, len(jobs), zoom)
     ox, oy = x0 - tx0 * TILE, y0 - ty0 * TILE
     img = canvas[oy:oy + height, ox:ox + width].copy()
-    geo = GeoRef(zoom, x0, y0, width, height, provider, PROVIDERS[provider]["attribution"])
+    geo = GeoRef(zoom, x0, y0, width, height, provider, info["attribution"])
     return img, geo
 
 

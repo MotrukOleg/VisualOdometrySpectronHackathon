@@ -56,3 +56,12 @@ def test_fetch_box_stitches_and_crops(monkeypatch, tmp_path):
     assert tuple(img[-1, -1, :2]) == (3, 3)
     # global x = 512 is the first column of tile 2
     assert img[0, 512 - 300 - 1, 0] == 1 and img[0, 512 - 300, 0] == 2
+
+
+def test_provider_info():
+    assert "{release}" not in tiles.provider_info("wayback:10")["url"]
+    assert "/tile/10/" in tiles.provider_info("wayback:10")["url"]
+    with pytest.raises(ValueError):
+        tiles.provider_info("wayback")  # a release is required
+    with pytest.raises(ValueError):
+        tiles.provider_info("google")

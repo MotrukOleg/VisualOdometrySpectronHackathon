@@ -69,15 +69,24 @@ def sanity_check(T: np.ndarray, size: tuple[int, int], cfg: dict) -> str:
     """Empty string if the transform is plausible for consecutive nadir frames."""
     if not np.all(np.isfinite(T)):
         return "non-finite"
-    det = np.linalg.det(T[:2, :2])
+    w, h = size
+    # Orientation and scale from the local Jacobian at the frame centre. det(T[:2, :2]) is only valid
+    # for affine T: with perspective and a large translation (a frame far from the map origin) it can be
+    # negative for a perfectly plausible homography.
+    pts = np.array([[w / 2, h / 2], [0, 0], [w, 0], [w, h], [0, h]], float)
+    den = T[2, 0] * pts[:, 0] + T[2, 1] * pts[:, 1] + T[2, 2]
+    if np.any(den * den[0] <= 0):
+        return "behind-camera"  # the horizon crosses the frame
+    q = apply(T, pts[:1])[0]
+    J = (T[:2, :2] - np.outer(q, T[2, :2])) / den[0]
+    det = np.linalg.det(J)
     if det <= 0:
         return "reflection"
     s = np.sqrt(det)
     if not (cfg.get("min_scale", 0.5) <= s <= cfg.get("max_scale", 2.0)):
         return f"scale={s:.2f}"
-    if max(abs(T[2, 0]), abs(T[2, 1])) > cfg.get("max_perspective", 0.002):
+    if max(abs(T[2, 0]), abs(T[2, 1])) > cfg.get("max_perspective", 0.002) * abs(T[2, 2]):
         return "perspective"
-    w, h = size
     corners = apply(T, [[0, 0], [w, 0], [w, h], [0, h]]).astype(np.float32)
     if not cv2.isContourConvex(corners.reshape(-1, 1, 2)):
         return "non-convex"

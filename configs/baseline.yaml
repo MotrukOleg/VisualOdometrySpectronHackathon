@@ -1,0 +1,19 @@
+# Baseline: SIFT + FLANN (KD-tree) + Lowe ratio 0.75 + RANSAC homography, sequential chain only.
+name: baseline_sift_flann_ransac
+data:
+  frames: data/synthetic/frames
+  gt: data/synthetic/gt.csv
+  resize_long: 1280
+features:
+  type: sift
+  max_keypoints: 4000
+matching:
+  type: flann
+  ratio: 0.75
+geometry:
+  model: homography
+  estimator: ransac
+  reproj_threshold: 3.0
+graph:
+  loop_closure: false
+  optimize: false

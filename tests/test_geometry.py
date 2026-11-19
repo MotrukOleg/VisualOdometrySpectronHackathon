@@ -56,3 +56,30 @@ def test_optimize_reduces_loop_inconsistency():
     after = edge_residuals(optimize(noisy, edges, "similarity"), edges)
     assert after["loop"] < 0.05 * before["loop"]
     assert after["seq"] < 1e-3
+
+
+def _tilted_far_from_origin():
+    """Frame (640x640) -> map homography: scale 0.25, 150 deg, mild perspective, frame ~3000 px from origin."""
+    a, s = np.radians(150), 0.25
+    R = np.array([[s * np.cos(a), -s * np.sin(a), 0], [s * np.sin(a), s * np.cos(a), 0], [0, 0, 1]])
+    P = np.array([[1, 0, 0], [0, 1, 0], [2.5e-4, 1.2e-4, 1]])  # tilt, in centred frame px
+    Tc = np.array([[1, 0, -320], [0, 1, -320], [0, 0, 1]])
+    Tw = np.array([[1, 0, 3050], [0, 1, 960], [0, 0, 1]])
+    H = Tw @ R @ P @ Tc
+    return H / H[2, 2]
+
+
+def test_sanity_accepts_tilted_homography_far_from_origin():
+    from vo.geometry import sanity_check
+
+    H = _tilted_far_from_origin()
+    assert np.linalg.det(H[:2, :2]) < 0  # the old affine-only test called this a reflection
+    assert sanity_check(H, (640, 640), {"min_scale": 0.02, "max_scale": 5.0, "max_perspective": 0.01}) == ""
+
+
+def test_sanity_rejects_real_reflection():
+    from vo.geometry import sanity_check
+
+    H = _tilted_far_from_origin() @ np.diag([-1.0, 1.0, 1.0])  # mirror the frame
+    H /= H[2, 2]
+    assert sanity_check(H, (640, 640), {"min_scale": 0.02, "max_scale": 5.0, "max_perspective": 0.01}) == "reflection"

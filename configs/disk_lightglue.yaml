@@ -1,0 +1,5 @@
+base: baseline.yaml
+name: disk_lightglue_magsac
+features: {type: disk, max_keypoints: 2048}
+matching: {type: lightglue, ratio: null}
+geometry: {estimator: magsac}

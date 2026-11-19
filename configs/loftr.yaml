@@ -1,0 +1,4 @@
+base: baseline.yaml
+name: loftr_magsac
+matching: {type: loftr, resize_long: 640, params: {min_conf: 0.3}}
+geometry: {estimator: magsac}

@@ -1,0 +1,5 @@
+# Needs: git clone https://github.com/magicleap/SuperGluePretrainedNetwork third_party/SuperGluePretrainedNetwork
+base: baseline.yaml
+name: superpoint_superglue_magsac
+matching: {type: superglue, resize_long: 960, params: {weights: outdoor, max_keypoints: 2048}}
+geometry: {estimator: magsac}

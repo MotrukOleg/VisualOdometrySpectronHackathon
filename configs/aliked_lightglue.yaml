@@ -1,0 +1,5 @@
+base: baseline.yaml
+name: aliked_lightglue_magsac
+features: {type: aliked, max_keypoints: 2048}
+matching: {type: lightglue, ratio: null}
+geometry: {estimator: magsac}

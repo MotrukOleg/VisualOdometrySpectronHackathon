@@ -1,0 +1,4 @@
+base: ../baseline_sift.yaml
+name: efficient_loftr_track
+localize: {mode: track}
+matching: {type: eloftr, resize_long: 1024, params: {threshold: 0.2}}

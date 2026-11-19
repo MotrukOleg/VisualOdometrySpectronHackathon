@@ -20,11 +20,13 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--world", default=None, help="real map image to fly over (e.g. data/train/global_map.png)")
     ap.add_argument("--frame-scale", type=float, default=1.0, help="map px per frame px (0.25 = 4x zoom)")
+    ap.add_argument("--degrade", default="none", choices=["none", "easy", "screen"],
+                    help="imitate filming a monitor (moire, blur, glare, colours, JPEG, bezel)")
     a = ap.parse_args()
     fs = tuple(int(v) for v in a.frame_size.split("x"))
     ws = tuple(int(v) for v in a.world_size.split("x"))
     out = make_flight(a.out, a.frames, fs, ws, a.turns, a.tilt_std, a.noise, a.seed,
-                      a.world, a.frame_scale)
+                      a.world, a.frame_scale, a.degrade)
     print(f"written to {out}")
 
 

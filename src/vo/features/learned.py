@@ -49,3 +49,35 @@ class LightGlueExtractor(Extractor):
         scores = out.pop("keypoint_scores", None)
         out.pop("image_size", None)
         return Features(kpts, desc, scores, (w, h), "float", extra=out)
+
+
+class DeDoDeExtractor(Extractor):
+    """DeDoDe v2 (kornia): detector 'L-C4-v2' + descriptor 'B-upright' / 'G-upright'. Match with mutual NN."""
+
+    def __init__(self, max_keypoints: int = 4000, device: str = "cpu", params: dict | None = None):
+        import torch
+        import kornia.feature as KF
+
+        p = {"detector_weights": "L-C4-v2", "descriptor_weights": "B-upright"}
+        p.update(params or {})
+        self.name = "dedode"
+        self.torch = torch
+        self.device = device
+        self.n = max_keypoints
+        dtype = torch.float16 if device == "cuda" else torch.float32
+        self.model = KF.DeDoDe.from_pretrained(p["detector_weights"], p["descriptor_weights"], amp_dtype=dtype)
+        self.model = self.model.eval().to(device)
+
+    def extract(self, img_bgr: np.ndarray) -> Features:
+        torch = self.torch
+        h, w = img_bgr.shape[:2]
+        rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+        t = torch.from_numpy(rgb).permute(2, 0, 1).float().div(255.0)[None].to(self.device)
+        with torch.inference_mode():
+            kpts, scores, desc = self.model(t, n=self.n)
+        k = kpts[0].float().cpu().numpy()
+        if np.abs(k).max() <= 1.5:  # normalised coordinates -> pixels
+            k = (k + 1) * np.array([w, h]) / 2 - 0.5
+        d = desc[0].float().cpu().numpy()
+        d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-8
+        return Features(k.astype(np.float32), d.astype(np.float32), scores[0].float().cpu().numpy(), (w, h), "float")

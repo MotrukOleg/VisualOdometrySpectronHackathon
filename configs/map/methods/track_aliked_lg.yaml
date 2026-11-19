@@ -1,0 +1,5 @@
+base: ../baseline_sift.yaml
+name: aliked_lightglue_track
+localize: {mode: track}
+features: {type: aliked, max_keypoints: 2048}
+matching: {type: lightglue, ratio: null}

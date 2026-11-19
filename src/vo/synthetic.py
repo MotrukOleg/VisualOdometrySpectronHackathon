@@ -10,6 +10,7 @@ import cv2
 import numpy as np
 import pandas as pd
 
+from .degrade import degrade
 from .io import imread, imwrite
 
 
@@ -81,7 +82,7 @@ def frame_to_world(cx, cy, yaw_deg, scale, w, h, tilt=(0.0, 0.0)) -> np.ndarray:
 
 def make_flight(out_dir: str | Path, n_frames: int = 150, frame_size=(640, 480), world_size=(4000, 3000),
                 turns: float = 1.15, tilt_std: float = 0.0, noise: float = 3.0, seed: int = 0,
-                world_path: str | Path | None = None, frame_scale: float = 1.0) -> Path:
+                world_path: str | Path | None = None, frame_scale: float = 1.0, degrade_preset: str = "none") -> Path:
     """Elliptic flight (> 1 turn -> loop closure) with the camera yawing along the heading.
 
     world_path:  use a real image (e.g. data/train/global_map.png) instead of the procedural texture;
@@ -117,8 +118,11 @@ def make_flight(out_dir: str | Path, n_frames: int = 150, frame_size=(640, 480),
         fr = cv2.warpPerspective(world, M, (w, h), flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
                                  borderMode=cv2.BORDER_REFLECT)
         fr = fr.astype(np.float32) * rng.uniform(0.9, 1.1) + rng.normal(0, noise, fr.shape)
+        fr = np.clip(fr, 0, 255).astype(np.uint8)
+        if degrade_preset != "none":
+            fr = degrade(fr, rng, degrade_preset)
         name = f"frame_{k:05d}"
-        imwrite(out / "frames" / f"{name}.jpg", np.clip(fr, 0, 255).astype(np.uint8), [1, 92])
+        imwrite(out / "frames" / f"{name}.jpg", fr, [1, 92])
         c = M @ np.array([w / 2, h / 2, 1.0])
         rows.append({"frame": k, "name": name, "x": c[0] / c[2], "y": c[1] / c[2],
                      "yaw_deg": yaw[k], "scale": scale[k]})

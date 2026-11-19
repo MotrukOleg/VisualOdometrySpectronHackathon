@@ -1,0 +1,26 @@
+# Standard-level baseline: every frame is matched against the WHOLE map.
+# SIFT (frame downscaled x0.5) + FLANN KD-tree + Lowe ratio 0.75 + MAGSAC++ homography.
+# No tracking, no smoothing (only outlier rejection + interpolation of failed frames).
+name: map_baseline_sift
+data:
+  frames: data/train/crops
+  gt: null
+map:
+  path: data/train/global_map.png
+  scale: 1.0
+  max_keypoints: 60000
+features:
+  type: sift
+  max_keypoints: 4000
+matching:
+  type: flann
+  ratio: 0.75
+geometry:
+  estimator: magsac
+localize:
+  frame_scale: 0.5
+  min_inliers: 20
+  reproj_threshold: 5.0
+smoothing:
+  interpolate: true
+  savgol_window: 0

@@ -1,0 +1,4 @@
+base: ../baseline_sift.yaml
+name: brisk_bf_global
+features: {type: brisk, max_keypoints: 4000}
+matching: {type: bf, ratio: 0.8}

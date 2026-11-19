@@ -1,0 +1,3 @@
+base: ../baseline_sift.yaml
+name: sift_flann_track
+localize: {mode: track}

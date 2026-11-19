@@ -1,0 +1,4 @@
+base: ../baseline_sift.yaml
+name: xfeat_track
+localize: {mode: track}
+matching: {type: xfeat, params: {top_k: 4096}}

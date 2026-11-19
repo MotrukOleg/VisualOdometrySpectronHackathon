@@ -77,3 +77,27 @@ def pair_summary(df: pd.DataFrame) -> dict:
         "t_match_ms": float(1000 * df["t_match"].mean()),
         "t_geom_ms": float(1000 * df["t_geom"].mean()),
     }
+
+
+def localization_metrics(traj: pd.DataFrame, gt: np.ndarray, thresholds=(5, 10, 25)) -> dict:
+    """Absolute map-localisation accuracy (no alignment: both are in map pixels).
+
+    Frames without an estimate (status 'lost') count as failures in success rates.
+    """
+    has_gt = np.all(np.isfinite(gt), axis=1)
+    est = traj[["x", "y"]].to_numpy(float)
+    has_est = traj["status"].isin(["map", "interp"]).to_numpy() & np.all(np.isfinite(est), axis=1)
+    err = np.full(len(traj), np.inf)
+    both = has_gt & has_est
+    err[both] = np.linalg.norm(est[both] - gt[both], axis=1)
+    out: dict = {"n_gt": int(has_gt.sum())}
+    if both.any():
+        e = err[both]
+        out.update(center_err_mean=float(e.mean()), center_err_median=float(np.median(e)),
+                   center_err_rmse=float(np.sqrt((e**2).mean())), center_err_max=float(e.max()))
+        reg = both & (traj["status"] == "map").to_numpy()
+        if reg.any():
+            out["center_err_registered_mean"] = float(err[reg].mean())
+    for t in thresholds:
+        out[f"success@{t}px"] = float((err[has_gt] < t).mean()) if has_gt.any() else float("nan")
+    return out

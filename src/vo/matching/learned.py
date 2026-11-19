@@ -161,3 +161,95 @@ class SuperGlueMatcher(_TorchImageMatcher):
         c = pred["matching_scores0"][0].cpu().numpy()
         valid = m > -1
         return k0[valid] / s0, k1[m[valid]] / s1, c[valid]
+
+
+class AdaLAMMatcher(DescriptorMatcher):
+    """AdaLAM (kornia): locally-affine-consistent filtering of nearest-neighbour matches.
+
+    Uses keypoint scale / orientation when the extractor provides them (SIFT family), otherwise unit LAFs.
+    """
+
+    def __init__(self, device: str = "cpu", params: dict | None = None):
+        import torch
+        import kornia.feature as KF
+
+        self.torch, self.KF, self.device = torch, KF, device
+        self.config = params or None
+
+    def _lafs(self, f: Features):
+        t = self.torch
+        xy = t.from_numpy(f.kpts).float()[None]
+        n = len(f.kpts)
+        sc = f.extra.get("scales", np.full(n, 8.0, np.float32))
+        ori = np.degrees(f.extra.get("oris", np.zeros(n, np.float32)))
+        scale = t.from_numpy(np.asarray(sc, np.float32)).view(1, n, 1, 1)
+        orient = t.from_numpy(np.asarray(ori, np.float32)).view(1, n, 1)
+        return self.KF.laf_from_center_scale_ori(xy, scale, orient).to(self.device)
+
+    def match(self, f0: Features, f1: Features):
+        t = self.torch
+        d0 = t.from_numpy(f0.desc.astype(np.float32)).to(self.device)
+        d1 = t.from_numpy(f1.desc.astype(np.float32)).to(self.device)
+        with t.inference_mode():
+            dists, idxs = self.KF.match_adalam(d0, d1, self._lafs(f0), self._lafs(f1), config=self.config,
+                                               hw1=f0.image_size[::-1], hw2=f1.image_size[::-1])
+        m = idxs.cpu().numpy().astype(int).reshape(-1, 2)
+        return m, (1.0 / (1.0 + dists.cpu().numpy().ravel())).astype(np.float32)
+
+
+class HFKeypointMatcher(_TorchImageMatcher):
+    """HuggingFace `transformers` keypoint matchers: Efficient LoFTR, SuperGlue (SuperPoint + SuperGlue).
+
+    model ids: zju-community/efficientloftr, magic-leap-community/superglue_outdoor
+    """
+
+    def __init__(self, model_id: str, device="cpu", resize_long_side=None, threshold: float = 0.2, preprocess=None):
+        super().__init__(device, resize_long_side, preprocess)
+        from transformers import AutoImageProcessor, AutoModelForKeypointMatching
+
+        self.processor = AutoImageProcessor.from_pretrained(model_id)
+        self.model = AutoModelForKeypointMatching.from_pretrained(model_id).eval().to(device)
+        self.threshold = threshold
+
+    def match_images(self, img0, img1):
+        a, s0 = self._prep(img0)
+        b, s1 = self._prep(img1)
+        ra, rb = cv2.cvtColor(a, cv2.COLOR_BGR2RGB), cv2.cvtColor(b, cv2.COLOR_BGR2RGB)
+        t = self.torch
+        inputs = self.processor([[ra, rb]], return_tensors="pt").to(self.device)
+        with t.inference_mode():
+            out = self.model(**inputs)
+        sizes = [[(a.shape[0], a.shape[1]), (b.shape[0], b.shape[1])]]
+        r = self.processor.post_process_keypoint_matching(out, sizes, threshold=self.threshold)[0]
+        p0 = r["keypoints0"].float().cpu().numpy() / s0
+        p1 = r["keypoints1"].float().cpu().numpy() / s1
+        c = r["matching_scores"].float().cpu().numpy()
+        return p0, p1, c
+
+
+class RoMaMatcher(_TorchImageMatcher):
+    """RoMa / tiny-RoMa dense matcher (romatch); `num` matches are sampled from the certainty map."""
+
+    def __init__(self, device="cpu", resize_long_side=None, variant: str = "tiny", num: int = 3000,
+                 preprocess=None, **kw):
+        super().__init__(device, resize_long_side, preprocess)
+        import romatch
+
+        if variant == "tiny":
+            self.model = romatch.tiny_roma_v1_outdoor(device=self.torch.device(device))
+        else:
+            self.model = romatch.roma_outdoor(device=self.torch.device(device), **kw)
+        self.num = num
+
+    def match_images(self, img0, img1):
+        from PIL import Image
+
+        a, s0 = self._prep(img0)
+        b, s1 = self._prep(img1)
+        A = Image.fromarray(cv2.cvtColor(a, cv2.COLOR_BGR2RGB))
+        B = Image.fromarray(cv2.cvtColor(b, cv2.COLOR_BGR2RGB))
+        with self.torch.inference_mode():
+            warp, cert = self.model.match(A, B)
+            m, c = self.model.sample(warp, cert, num=self.num)
+            ka, kb = self.model.to_pixel_coordinates(m, a.shape[0], a.shape[1], b.shape[0], b.shape[1])
+        return ka.float().cpu().numpy() / s0, kb.float().cpu().numpy() / s1, c.float().cpu().numpy()

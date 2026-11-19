@@ -1,0 +1,5 @@
+base: ../baseline_sift.yaml
+name: dedode_v2_mnn_track
+localize: {mode: track}
+features: {type: dedode, max_keypoints: 4000}
+matching: {type: bf, ratio: null, cross_check: true}

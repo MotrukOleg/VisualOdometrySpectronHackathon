@@ -1,0 +1,33 @@
+2026-11-19 21:17:31,007 INFO vo.localize: localising 50 frames from data/train/crops on data/train/global_map.png (cuda)
+localise:   0%|          | 0/50 [00:00<?, ?frame/s]2026-11-19 21:17:33,768 INFO vo.localize: map: 3645x1845, 60000 keypoints (sift) in 1.8s
+localise:   2%|2         | 1/50 [00:02<02:19,  2.84s/frame]localise:   4%|4         | 2/50 [00:02<01:00,  1.25s/frame]localise:   6%|6         | 3/50 [00:03<00:34,  1.36frame/s]localise:   8%|8         | 4/50 [00:03<00:22,  2.02frame/s]localise:  10%|#         | 5/50 [00:03<00:16,  2.77frame/s]localise:  12%|#2        | 6/50 [00:03<00:12,  3.62frame/s]localise:  14%|#4        | 7/50 [00:03<00:09,  4.45frame/s]localise:  16%|#6        | 8/50 [00:03<00:08,  5.15frame/s]localise:  18%|#8        | 9/50 [00:03<00:07,  5.60frame/s]localise:  20%|##        | 10/50 [00:03<00:06,  6.04frame/s]localise:  22%|##2       | 11/50 [00:04<00:06,  6.34frame/s]localise:  24%|##4       | 12/50 [00:04<00:05,  6.68frame/s]localise:  26%|##6       | 13/50 [00:04<00:05,  6.79frame/s]localise:  28%|##8       | 14/50 [00:04<00:05,  6.70frame/s]localise:  30%|###       | 15/50 [00:04<00:05,  6.85frame/s]localise:  32%|###2      | 16/50 [00:04<00:04,  7.00frame/s]localise:  34%|###4      | 17/50 [00:04<00:04,  6.92frame/s]localise:  36%|###6      | 18/50 [00:05<00:04,  7.15frame/s]localise:  38%|###8      | 19/50 [00:05<00:04,  7.30frame/s]localise:  40%|####      | 20/50 [00:05<00:04,  7.36frame/s]localise:  42%|####2     | 21/50 [00:05<00:03,  7.32frame/s]localise:  44%|####4     | 22/50 [00:05<00:03,  7.32frame/s]localise:  46%|####6     | 23/50 [00:05<00:03,  7.38frame/s]localise:  48%|####8     | 24/50 [00:05<00:03,  7.46frame/s]localise:  50%|#####     | 25/50 [00:06<00:03,  7.41frame/s]localise:  52%|#####2    | 26/50 [00:06<00:03,  7.03frame/s]localise:  54%|#####4    | 27/50 [00:06<00:03,  7.03frame/s]localise:  56%|#####6    | 28/50 [00:06<00:03,  6.88frame/s]localise:  58%|#####8    | 29/50 [00:06<00:03,  7.00frame/s]localise:  60%|######    | 30/50 [00:06<00:02,  7.14frame/s]localise:  62%|######2   | 31/50 [00:06<00:02,  7.37frame/s]localise:  64%|######4   | 32/50 [00:07<00:02,  7.48frame/s]localise:  66%|######6   | 33/50 [00:07<00:02,  7.72frame/s]localise:  68%|######8   | 34/50 [00:07<00:01,  8.00frame/s]localise:  70%|#######   | 35/50 [00:07<00:01,  8.42frame/s]localise:  72%|#######2  | 36/50 [00:07<00:01,  8.30frame/s]localise:  74%|#######4  | 37/50 [00:07<00:01,  8.71frame/s]localise:  78%|#######8  | 39/50 [00:07<00:01,  8.76frame/s]localise:  80%|########  | 40/50 [00:07<00:01,  8.67frame/s]localise:  82%|########2 | 41/50 [00:08<00:01,  8.46frame/s]localise:  84%|########4 | 42/50 [00:08<00:00,  8.11frame/s]localise:  86%|########6 | 43/50 [00:08<00:00,  7.96frame/s]localise:  88%|########8 | 44/50 [00:08<00:00,  7.79frame/s]localise:  90%|######### | 45/50 [00:08<00:00,  7.70frame/s]localise:  92%|#########2| 46/50 [00:08<00:00,  7.58frame/s]localise:  94%|#########3| 47/50 [00:08<00:00,  7.32frame/s]localise:  96%|#########6| 48/50 [00:09<00:00,  7.45frame/s]localise:  98%|#########8| 49/50 [00:09<00:00,  7.60frame/s]localise: 100%|##########| 50/50 [00:09<00:00,  7.88frame/s]localise: 100%|##########| 50/50 [00:09<00:00,  5.40frame/s]
+2026-11-19 21:17:41,065 INFO vo.localize: registered 50/50, rejected 0, interpolated 0, lost 0 -> experiments\results\_smoke_sift_track_crops
+{
+  "name": "sift_track_crops",
+  "run_id": "sift_track_crops_20261119-211730",
+  "features": "sift",
+  "matcher": "flann",
+  "estimator": "magsac",
+  "frame_scale": 0.5,
+  "device": "cuda",
+  "n_frames": 50,
+  "n_registered": 50,
+  "n_rejected": 0,
+  "n_interp": 0,
+  "n_lost": 0,
+  "mean_inliers": 210.38,
+  "median_inliers": 207.0,
+  "mean_reproj_err": 0.3101491251726306,
+  "mode": "track",
+  "map_keypoints": 0,
+  "t_map_features_s": 0.0,
+  "sources": "{\"roi\": 49, \"init\": 1}",
+  "vram_peak_mb": 0.0,
+  "t_extract_ms": 1.3981580012477934,
+  "t_match_ms": 165.31785001046956,
+  "t_geom_ms": 0.9673119965009391,
+  "registered_rate": 1.0,
+  "fps": 5.963622380276042,
+  "t_total_s": 12.950746699934825,
+  "out_dir": "experiments\\results\\_smoke_sift_track_crops"
+}

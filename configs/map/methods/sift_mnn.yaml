@@ -1,0 +1,3 @@
+base: ../baseline_sift.yaml
+name: sift_mnn_global
+matching: {type: bf, ratio: null, cross_check: true}

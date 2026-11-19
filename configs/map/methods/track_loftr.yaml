@@ -1,0 +1,4 @@
+base: ../baseline_sift.yaml
+name: loftr_track
+localize: {mode: track}
+matching: {type: loftr, resize_long: 800, params: {min_conf: 0.3}}

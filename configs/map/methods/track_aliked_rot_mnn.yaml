@@ -1,0 +1,6 @@
+base: ../baseline_sift.yaml
+name: aliked_n16rot_mnn_track
+localize: {mode: track}
+tracking: {rotation: none}
+features: {type: aliked, max_keypoints: 2048, params: {model_name: aliked-n16rot}}
+matching: {type: bf, ratio: null, cross_check: true}

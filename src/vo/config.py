@@ -21,9 +21,11 @@ DEFAULTS: dict[str, Any] = {
         "scale": 1.0,  # extra explicit scale factor (e.g. 0.25 to match the map resolution)
     },
     "preprocess": {
-        "clahe": False,
+        "clahe": False,  # map + frames
         "clahe_clip": 2.0,
         "clahe_grid": 8,
+        "blur_sigma": 0.0,  # frames only: Gaussian low-pass against screen moire (px of the prepared frame)
+        "screen_mask": False,  # frames only: drop matches on the dark monitor bezel / desk
     },
     "features": {
         "type": "sift",  # sift|rootsift|orb|akaze|brisk|kaze|superpoint|disk|aliked|lg_sift
@@ -72,6 +74,48 @@ DEFAULTS: dict[str, Any] = {
     "eval": {
         "rpe_delta": 10,  # frames
         "photometric_every": 5,
+        "success_thresholds": [5, 10, 25],  # map px, for frame-to-map localisation
+    },
+    # ---- frame-to-map localisation (Standard / Advanced level) ----
+    "map": {
+        "path": "data/train/global_map.png",
+        "scale": 1.0,  # downscale of the map before feature extraction
+        "max_keypoints": 60000,  # keypoint budget for the whole map
+    },
+    "localize": {
+        # global: every frame vs the whole map (one FLANN index; classical descriptors only)
+        # track:  frame vs a map ROI around the predicted position (any PairMatcher incl. learned / dense);
+        #         the first frame and frames after a loss are initialised by the global SIFT search
+        # tiles:  frame vs every overlapping map tile, best tile wins (search-strategy ablation)
+        "mode": "global",
+        "frame_scale": 0.5,  # frames are resized before matching (map is ~4x coarser than the crops)
+        "min_inliers": 20,
+        "reproj_threshold": 5.0,  # map px (oblique views -> homography is approximate)
+        "min_scale": 0.02,  # sanity limits for the frame->map scale (map px per frame px)
+        "max_scale": 5.0,
+        "max_perspective": 0.01,
+    },
+    "tracking": {
+        "roi_factor": 1.6,  # ROI side = factor * predicted footprint diagonal (map px)
+        "roi_retry_factor": 3.0,  # second attempt with a larger ROI before global re-initialisation
+        "min_roi": 256,
+        "work_scale": 1.0,  # matching resolution relative to the map (2 = map ROI and frame upsampled x2)
+        "auto_scale": True,  # resize the frame with the predicted scale so it matches the map resolution
+        "rotation": "predicted",  # none | predicted (derotate by predicted heading) | test (try 4 rotations)
+        "motion_model": "constant_velocity",  # or 'static'
+        "tile_factor": 1.6,  # tiles mode: tile side = factor * footprint diagonal, stride = side / 2
+    },
+    "smoothing": {
+        "outlier_factor": 4.0,  # a fix is an outlier if it is > factor * median step from its neighbours
+        "outlier_min_px": 50.0,
+        "interpolate": True,  # fill failed / rejected frames
+        "savgol_window": 0,  # Savitzky-Golay window (odd, frames); 0 = no smoothing
+        "savgol_order": 2,
+    },
+    "viz": {
+        "footprints": True,  # draw the outline of every frame on the map
+        "label_every": 0,  # 0 = auto
+        "zoom_margin": 150,  # px around the route for route_zoom.png
     },
     "output": {
         "dir": "experiments/results",

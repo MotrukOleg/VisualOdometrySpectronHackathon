@@ -1,0 +1,7 @@
+# Datasets of the map-localisation benchmark (paths relative to the repository root).
+# gt: CSV with name/frame, x, y in map pixels (synthetic only); null = no ground truth.
+crops:      {frames: data/train/crops,              gt: null,                        frame_scale: 0.5}
+syn_easy:   {frames: data/synthetic_map/frames,     gt: data/synthetic_map/gt.csv,   frame_scale: 0.5}
+syn_hard:   {frames: data/synthetic_hard/frames,    gt: data/synthetic_hard/gt.csv,  frame_scale: 0.5}
+video0061:  {frames: data/video/IMG_0061_every5,    gt: null,                        frame_scale: 0.5}
+video0062:  {frames: data/video/IMG_0062_every5,    gt: null,                        frame_scale: 0.5}

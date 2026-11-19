@@ -1,0 +1,5 @@
+base: ../baseline_sift.yaml
+name: orb_bf_track
+localize: {mode: track}
+features: {type: orb, max_keypoints: 4000}
+matching: {type: bf, ratio: 0.8}

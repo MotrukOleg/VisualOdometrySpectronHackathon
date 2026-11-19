@@ -1,0 +1,5 @@
+base: ../baseline_sift.yaml
+name: sift_lightglue_track
+localize: {mode: track}
+features: {type: lg_sift, max_keypoints: 2048}
+matching: {type: lightglue, ratio: null}

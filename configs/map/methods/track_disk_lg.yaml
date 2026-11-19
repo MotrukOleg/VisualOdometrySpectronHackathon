@@ -1,0 +1,5 @@
+base: ../baseline_sift.yaml
+name: disk_lightglue_track
+localize: {mode: track}
+features: {type: disk, max_keypoints: 2048}
+matching: {type: lightglue, ratio: null}

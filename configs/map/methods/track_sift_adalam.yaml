@@ -1,0 +1,4 @@
+base: ../baseline_sift.yaml
+name: sift_adalam_track
+localize: {mode: track}
+matching: {type: adalam, ratio: null}

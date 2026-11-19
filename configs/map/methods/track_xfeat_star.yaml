@@ -1,0 +1,4 @@
+base: ../baseline_sift.yaml
+name: xfeat_star_track
+localize: {mode: track}
+matching: {type: xfeat_star, params: {top_k: 8000}}

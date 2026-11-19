@@ -1,0 +1,4 @@
+base: ../baseline_sift.yaml
+name: tiny_roma_track
+localize: {mode: track}
+matching: {type: roma_tiny, resize_long: 640, params: {num: 3000}}

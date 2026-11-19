@@ -1,0 +1,3 @@
+base: ../baseline_sift.yaml
+name: rootsift_flann_global
+features: {type: rootsift}

@@ -1,0 +1,4 @@
+base: baseline.yaml
+name: akaze_bf_ransac
+features: {type: akaze, max_keypoints: 4000}
+matching: {type: bf, ratio: 0.8}

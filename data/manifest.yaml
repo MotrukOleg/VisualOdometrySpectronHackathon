@@ -1,0 +1,86 @@
+# Dataset manifest: where every dataset comes from and how to verify it.
+# Used by scripts/download_data.py. Data itself is NOT committed (see .gitignore).
+#
+# Each dataset:
+#   source.gdrive_id  - Google Drive file id (the file must be shared as "Anyone with the link")
+#   source.url        - alternative: direct download URL
+#   archive           - archive file name (zip) or null for a single file
+#   archive_sha256    - checksum of the downloaded file (optional but recommended)
+#   dest              - target directory, relative to the repository root
+#   strip_prefixes    - archive entries starting with these are skipped
+#   files             - expected files after extraction: relative path -> sha256
+
+datasets:
+  train:
+    description: "It-Jim CV test task 2026 - satellite map + 50 UAV crops (Standard level)"
+    source:
+      gdrive_id: 1h6xfYQfokDo5AzSv1Q-x66HluDpWSh87  # link from the task description (.docx)
+    archive: Trainee_2025_classic_cv.zip
+    archive_sha256: bfccda120443c422150d92be344e80366740fa3bae9cd40c8cf5a05299400e7d
+    archive_size: 58142343
+    dest: data/train
+    strip_prefixes: ["__MACOSX/"]
+    files:
+      crops/crop_0.png: 0695cf20a99eb797976f05c11fa2b03a6a13936fbd3fe93e238256a1acba7044
+      crops/crop_1.png: 31e499fde2fc9f196bdde7dc9cc87968d29f600f95b6bbeaa8e2da65865eebb7
+      crops/crop_2.png: df63b7940f1fb0e93bdcccdbb2335cccbbf7b66cbf8acbf3b082e4f25f44271f
+      crops/crop_3.png: a684e7cdf6f6d9fc16d86a2b697ef17783856fb5a022179b3605fe214f2ef592
+      crops/crop_4.png: 65429f79a4a9cfbb9bb4973b9f99fb69247deb0977c87b56177b4c3ba263a81a
+      crops/crop_5.png: 0ee47bdfd18727a91ad78690afaaa5732e21bd106b9d1b8c6417fd40db564ac5
+      crops/crop_6.png: d26bb138aa988c72c3472f7614259cd3f8624c6d5533bae892d24293a2b9b871
+      crops/crop_7.png: 0b37598f5f9b529d192d744d8cd90bf17e838d04671e3bb7b60d33c3c75d1d57
+      crops/crop_8.png: ed0d2ac8d962ecc91cf6d40d71732012abcdf55beb4007cdd3ec571374efd40a
+      crops/crop_9.png: 17d3d9b9484878e43843a9019dbb8fd19080a3232775f55c905c8f802d1e3de5
+      crops/crop_10.png: b8ad852625d067eda6c23369fb74784d8652ae192aa6659716f83b57aebdb3d3
+      crops/crop_11.png: 606941198914acb2e1696ef2aa03e458d950c5eefd614b7e24baafd3ea7054a4
+      crops/crop_12.png: 75430a2315d9fcd19e03face7e3170677085f20b84fad50054612e739180a047
+      crops/crop_13.png: f57a3b0163bb94ed492bb0eb76db2592898d24d482803c808bd837c3f7bd2b6e
+      crops/crop_14.png: 7f75943ba2220e5de686694376854449871904fc995d3475059971f1c88582e1
+      crops/crop_15.png: c515fd711f227587fbe44bfa336947d825a67f0bc7c3ae3b1c12e09cf50a3cfd
+      crops/crop_16.png: 21fa35b8daf530e9dfff5a301d87ccdcbae10228f84df9aa21d3c71526b3abbc
+      crops/crop_17.png: 927387b2e69c9032c13cd17ee8d4e5c758f8d87a3ddb9c494b9e88eca07cd54f
+      crops/crop_18.png: 1ab6072d452096b862238b164c3ffb6e82425e7aaee3d775b5ccc83f6100a401
+      crops/crop_19.png: 80a20be1c2195bc4b5ffb541341826609d9246b4a748255daa89b151ce62bb0a
+      crops/crop_20.png: 54875602b193589c84733f260f7dbf117266515bca453add66c15a96b490286b
+      crops/crop_21.png: 89d38e1a1797fa26d30473c717ab878fb925be630694ae0a13341f4d2e2884e6
+      crops/crop_22.png: 1bf9312a3f9e180de4a4d20513ac9417797eecaa8af7464fca89b2e8c4218765
+      crops/crop_23.png: 2006c89d34352962204f3f009588ed3a38102b521d05f82faf1c1f08ff9d91aa
+      crops/crop_24.png: f2bc1ee620e5e70b43eb8f09c00d805efadf2877e64e90456f49b573271f240d
+      crops/crop_25.png: fc966dfdff4ae9ed60767f10fdb8b61d496cfedf7df40abafbfe55f5d596e179
+      crops/crop_26.png: 6f38b16ca772d4b7b8e28ae98b54a865bd4e9cc2c32758499e3b376091a9239b
+      crops/crop_27.png: a903fba413a77bda0fdcb9877aea2af84c04dff7200935467f16f1d62c3fb4a3
+      crops/crop_28.png: 072e2af8405207a548c22dcfb6d386d7338cef98ff39472d3f60df28b085138a
+      crops/crop_29.png: 26af90b24e9439349661c82b7e9a5b75f9d4c1f04688919e987d972b6eb433e2
+      crops/crop_30.png: 60c0b02167c46349fa0cd99fc6002e572e072a392c6222ca91edaa77b8f96b80
+      crops/crop_31.png: 5ffc72f46b44709b1dbb11d77f2cd02357dee5ecc0c48661a965c1a6291c840a
+      crops/crop_32.png: 301792370ae46ccb67aaee388c7fa2a03441f2ad1897247f002fe6cbe8c54501
+      crops/crop_33.png: db9cb33e75a0e175df11107a5f2040261800d8800a5301bec1bc1a98771860fd
+      crops/crop_34.png: 9d07f244718fa43680397da28dcb4e682cf3389056d1bba5c686b4a0380e1c87
+      crops/crop_35.png: 9fc596177875864666280b57e7ffaefc0e446d8e729bfb789d87e152d8af1ae2
+      crops/crop_36.png: ebc2554385f9e44095efe0a7075b407fd7e147f2e749fee0587202c0cff153de
+      crops/crop_37.png: 1005e568775be4e7d8251dd1e151ca4f04a5fc228921b7439c1f9c38d4aa6a86
+      crops/crop_38.png: 0ad8bcc64a1e6e1269fb809dbb522359f060d0f48bb28cd75b5349cd4212265d
+      crops/crop_39.png: 1322444b12bfb33e6f3a083b1e2712ef95e59cd4594c3ec5d9ea3bb4f1533248
+      crops/crop_40.png: ab361002d73f62ef56c9e82ccaa30f61d919f4413b139f0e4423c91eb7d54573
+      crops/crop_41.png: 04723a662e7507fe499508dc8c0cf1cfd7c68ef3a1fee00d4cb9853a255bc204
+      crops/crop_42.png: af63c272d1a8f8a6d5a49a2bcd611367dc35dcd7279bd6bbad1a8f6786581518
+      crops/crop_43.png: 400b842d8a5623c8f16c35c310541726b084af11b27ee89415e5d62d3ed25720
+      crops/crop_44.png: a79ee84ff05386b0282b126f04ac2ac3cfdc2fea3a5171958965b7ea4992eabb
+      crops/crop_45.png: d6873301d6dfc5727c3cf6191a48cc3e6b3a947fb95e6da4854d25e8a56a2876
+      crops/crop_46.png: 36052d2d5f12bb64605ea75ac4c6505bc0f52c58d1e11d61e5923135af53f45e
+      crops/crop_47.png: 44a71500b71c1390a0efc4a6c7636fd5cb4fcffe8a293026650ceb8929fa2377
+      crops/crop_48.png: e0b34da53535dbcf9cab2d064a5853bd6d8126a4d35a87a44a2c36c35525c0e3
+      crops/crop_49.png: 53e7cf921a205f67a3314a34aa881fdf30fefbcad0233958f7b1719cd5c797d5
+      global_map.png: 3246dd11d490a8ceab1c4243706bf0d76e76570f89396b56441cb59aa9f05851
+
+  # Own videos for the Advanced level (stage 4). Upload to the shared Google Drive folder,
+  # share as "Anyone with the link", then add an entry like this one and fill the checksums
+  # (python scripts/download_data.py --hash <file> prints them):
+  #
+  # video_easy:
+  #   description: "Phone over monitor, slow flight, no tilt"
+  #   source: {gdrive_id: <FILE_ID>}
+  #   archive: null
+  #   filename: easy.mp4
+  #   archive_sha256: <sha256>
+  #   dest: data/video

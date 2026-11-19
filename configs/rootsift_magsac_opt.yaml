@@ -1,0 +1,7 @@
+# Strong classical variant: RootSIFT + mutual FLANN + MAGSAC++ + loop closure + global optimisation.
+base: baseline.yaml
+name: rootsift_magsac_loop_opt
+features: {type: rootsift}
+matching: {type: flann, ratio: 0.8, cross_check: true}
+geometry: {estimator: magsac, reproj_threshold: 2.0}
+graph: {extra_skips: [2], loop_closure: true, optimize: true}

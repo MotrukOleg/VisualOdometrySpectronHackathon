@@ -6,7 +6,7 @@ scripts/make_area.py). If a GT CSV with lon/lat is given, errors are reported in
 Writes into the run directory:
     trajectory_gps.csv   trajectory + lat/lon of the centre and footprint corners (+ err_m)
     route.geojson        route, frames, footprints, GT (opens in geojson.io, QGIS, Google Earth via import)
-    route_map.html       self-contained interactive map (satellite / OSM, click a frame for details)
+    route_map.html       self-contained interactive map (satellite / streets, click a frame for details)
     gps_metrics.json     error in metres (only with GT)
 
 Example:

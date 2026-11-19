@@ -87,7 +87,7 @@ run_id (у тому ж порядку, що в таблиці): `map_baseline_si
 ### GPS на виході (2026-11-19)
 `scripts/export_gps.py --run <run> --geo data/areas/<name>/geo.json --gt .../gt.csv`: пікселі мапи → lat/lon через
 Web Mercator (точно, без апроксимації) → `trajectory_gps.csv`, `route.geojson` (відкривається в geojson.io, QGIS),
-`route_map.html` (інтерактивна мапа: супутник / OSM, клік на кадр — координати, курс, inliers, похибка в метрах).
+`route_map.html` (інтерактивна мапа: супутник / вулиці Esri, клік на кадр — координати, курс, inliers, похибка в метрах).
 Ті самі прогони SIFT, похибка відносно GT у метрах на землі:
 
 | Район | Похибка, медіана | Максимум | В межах 5 м |

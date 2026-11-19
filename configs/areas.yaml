@@ -1,0 +1,8 @@
+# Areas for the "any place on Earth" benchmark (scripts/make_area.py --area <name>).
+# Chosen to differ from the task map (city + river) in terrain type, so robustness is shown, not memorised.
+# center: [lat, lon] in degrees; size_km: [width, height] on the ground; zoom: Web Mercator zoom of the MAP.
+# Frames are rendered from zoom + detail (default 2 -> frames are 4x more detailed, as in the task crops).
+lviv_old_town:   {center: [49.8419, 24.0316], size_km: [2.8, 1.4], zoom: 17, terrain: "dense city, red roofs"}
+kyiv_dnipro:     {center: [50.4440, 30.5560], size_km: [2.8, 1.4], zoom: 17, terrain: "city, river, bridges, parks"}
+carpathians:     {center: [48.3600, 24.4100], size_km: [2.8, 1.4], zoom: 17, terrain: "mountain forest, ski slopes (Bukovel)"}
+poltava_fields:  {center: [49.5000, 34.3000], size_km: [2.8, 1.4], zoom: 17, terrain: "farmland, repetitive fields"}

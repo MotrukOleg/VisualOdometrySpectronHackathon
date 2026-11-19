@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+
+# Data, weights and experiment outputs (large, not versioned)
+data/*
+!data/.gitkeep
+!data/manifest.yaml
+weights/
+third_party/
+*.pth
+*.pt
+*.ckpt
+experiments/results/
+experiments/cache/
+
+# OS / IDE
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Downloaded archives
+*.zip
+
+# Presentation (reveal.js)
+docs/presentation/node_modules/

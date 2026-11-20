@@ -3,22 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mission Replay — навігація дрона за мапою</title>
+  <title>єДрон</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%276%27 fill=%27%23e8a33d%27/%3E%3C/svg%3E">
 </head>
 <body>
 <header>
-  <div class="brand"><span class="dot"></span> Mission Replay <small>навігація дрона за супутниковою мапою</small></div>
+  <div class="brand">єДрон</div>
+  <nav class="nav">
+    <button type="button" class="navbtn active" data-view="missions">Місії</button>
+    <button type="button" class="navbtn" data-view="spoof">Спуфінг GPS</button>
+    <button type="button" class="navbtn" data-view="stress">Спотворення</button>
+    <button type="button" class="navbtn" data-view="live">Камера наживо</button>
+  </nav>
   <div id="job-title" class="job-title"></div>
   <div id="stage" class="stage"></div>
 </header>
 
-<main>
+<!-- ============================== Missions ============================== -->
+<main class="view" data-view="missions">
   <aside>
     <section class="card">
       <h2>Нова місія</h2>
       <div class="tabs">
-        <button type="button" class="tab active" data-tab="preset">Готовий набір</button>
+        <button type="button" class="tab active" data-tab="preset">Набір</button>
+        <button type="button" class="tab" data-tab="coords">Координати</button>
         <button type="button" class="tab" data-tab="upload">Свої дані</button>
       </div>
       <form id="job-form">
@@ -26,23 +35,52 @@
           <label>Набір даних
             <select name="preset" id="preset"></select>
           </label>
+          <p class="badge" id="preset-kind"></p>
           <p class="hint" id="preset-hint"></p>
         </div>
-        <div class="tab-body hidden" data-tab="upload">
-          <label>Мапа <span class="muted" id="map-hint"></span>
-            <input type="file" name="map_file" accept="image/*">
+        <div class="tab-body hidden" data-tab="coords">
+          <div class="row">
+            <label>Широта <input type="number" name="lat" step="any" value="49.8419"></label>
+            <label>Довгота <input type="number" name="lon" step="any" value="24.0316"></label>
+          </div>
+          <label>Розмір ділянки, км (ширина x висота)
+            <input type="text" name="size_km" value="2x1.2">
           </label>
+          <p class="badge synthetic">Синтетика</p>
+          <p class="hint">Мапа з супутникових тайлів Esri (потрібен інтернет), над нею генерується політ із точною
+            відповіддю. Кадри вирізаються з того самого знімка, що й мапа, тому похибка оптимістична.</p>
+        </div>
+        <div class="tab-body hidden" data-tab="upload">
           <label>Кадри дрона: фото або одне відео
             <input type="file" name="frames" id="frames-input" multiple accept="image/*,video/*">
+          </label>
+          <label>GPS кадрів, CSV <span class="muted">(необов'язково: назва кадру, lat, lon)</span>
+            <input type="file" name="gps_file" id="gps-input" accept=".csv,.txt">
+          </label>
+          <label>Мапа <span class="muted" id="map-hint"></span>
+            <input type="file" name="map_file" id="map-input" accept="image/*">
+          </label>
+          <label id="geo-row" class="hidden">geo.json своєї мапи <span class="muted">(для GPS на своїй мапі)</span>
+            <input type="file" name="geo_file" accept=".json">
+          </label>
+          <label id="zoom-row" class="hidden">Детальність мапи з тайлів
+            <select name="zoom">
+              <option value="16">zoom 16 (~2 м/px)</option>
+              <option value="17">zoom 17 (~1 м/px)</option>
+              <option value="18" selected>zoom 18 (~0.5 м/px)</option>
+              <option value="19">zoom 19 (~0.25 м/px)</option>
+            </select>
           </label>
           <div class="row">
             <label title="Для відео: брати кожен N-й кадр">Кожен N-й кадр відео
               <input type="number" name="every" value="5" min="1" max="60">
             </label>
-            <label title="Масштаб, до якого зменшується кадр перед пошуком на мапі. Кадри завдання ~4x детальніші за мапу">Масштаб кадру
-              <input type="number" name="frame_scale" value="0.5" min="0.1" max="2" step="0.05">
+            <label title="У скільки разів зменшити кадр перед пошуком: ~ (метрів на піксель кадру) / (метрів на піксель мапи)">Масштаб кадру
+              <input type="number" name="frame_scale" value="0.5" min="0.05" max="2" step="0.01">
             </label>
           </div>
+          <p class="hint" id="upload-hint">Без GPS: реальні кадри без правильної відповіді. З GPS: мапа будується з
+            супутникових тайлів навколо треку, похибка рахується в метрах відносно GPS.</p>
         </div>
         <label>Метод
           <select name="method" id="method"></select>
@@ -51,7 +89,7 @@
         <label>Максимум кадрів <span class="muted">(порожньо = усі)</span>
           <input type="number" name="max_frames" min="1" placeholder="усі">
         </label>
-        <button type="submit" class="primary" id="start-btn">▶ Запустити</button>
+        <button type="submit" class="primary" id="start-btn">Запустити</button>
         <p class="error" id="form-error"></p>
       </form>
     </section>
@@ -69,8 +107,11 @@
         <div class="cam-box"><img id="cam" alt=""><div id="cam-empty" class="empty">Запустіть місію ліворуч</div></div>
       </div>
       <div class="panel map">
-        <div class="panel-head">Мапа
+        <div class="panel-head">Мапа <span id="job-kind" class="badge inline"></span>
           <span class="spacer"></span>
+          <select id="basemap" class="mini hidden" title="Підкладка мапи">
+            <option value="map">мапа місії</option><option value="streets">вулиці</option><option value="satellite">супутник Esri</option>
+          </select>
           <label class="toggle"><input type="checkbox" id="follow" checked> Слідкувати</label>
           <label class="toggle"><input type="checkbox" id="show-fp" checked> Контури кадрів</label>
           <button type="button" id="fit-btn" class="small">Уся мапа</button>
@@ -79,7 +120,7 @@
         <div class="legend">
           <span><i class="sw grad"></i>час: старт → фініш</span>
           <span><i class="sw cur"></i>поточний кадр (жовтий край — верх кадру)</span>
-          <span id="legend-gt" class="hidden"><i class="sw gt"></i>справжній маршрут (GT)</span>
+          <span id="legend-gt" class="hidden"><i class="sw gt"></i>справжній маршрут</span>
           <span><i class="sw lost"></i>кадр втрачено</span>
         </div>
       </div>
@@ -90,17 +131,18 @@
       <div class="stat"><b id="s-reg">—</b><span>прив'язано</span></div>
       <div class="stat"><b id="s-lost">—</b><span>втрачено</span></div>
       <div class="stat"><b id="s-inl">—</b><span>inliers (поточний / середнє)</span></div>
-      <div class="stat"><b id="s-fps">—</b><span>кадр/с</span></div>
+      <div class="stat"><b id="s-fps">—</b><span>швидкість обчислення, кадр/с</span></div>
       <div class="stat"><b id="s-src">—</b><span>як знайдено</span></div>
-      <div class="stat hidden" id="stat-err"><b id="s-err">—</b><span>похибка vs GT, px (поточна / медіана)</span></div>
+      <div class="stat hidden" id="stat-err"><b id="s-err">—</b><span>похибка, px мапи (поточна / медіана)</span></div>
     </div>
 
     <div class="timeline card">
       <div class="controls">
         <button type="button" id="play" class="small" title="Відтворити / пауза">▶</button>
-        <select id="speed" title="Швидкість відтворення">
-          <option value="4">0.5×</option><option value="8" selected>1×</option>
-          <option value="16">2×</option><option value="40">5×</option>
+        <select id="speed" title="Темп показу: кадрів на секунду (і під час обчислення, і при повторі)">
+          <option value="0.5">0.5 кадр/с</option><option value="1">1 кадр/с</option>
+          <option value="2" selected>2 кадр/с</option><option value="5">5 кадр/с</option>
+          <option value="15">15 кадр/с</option>
         </select>
         <input type="range" id="slider" min="0" max="0" value="0">
         <span id="progress" class="muted"></span>
@@ -113,11 +155,197 @@
         <a data-file="route_zoom.png" target="_blank">route_zoom.png</a>
         <a data-file="trajectory.csv">trajectory.csv</a>
         <a data-file="metrics.json" target="_blank">metrics.json</a>
+        <span id="gps-links" class="hidden">
+          GPS:
+          <a data-file="route_map.html" target="_blank" class="strong">інтерактивна мапа</a>
+          <a data-file="route.geojson">route.geojson</a>
+          <a data-file="trajectory_gps.csv">trajectory_gps.csv</a>
+        </span>
         <span id="summary" class="muted"></span>
       </div>
     </div>
   </section>
 </main>
+
+<!-- ============================== GPS spoofing ============================== -->
+<main class="view hidden" data-view="spoof">
+  <aside>
+    <section class="card">
+      <h2>Спуфінг GPS</h2>
+      <p class="hint">GPS дрона з вибраного кадру повільно відтягують убік. Камера незалежно звіряє кадри з мапою: коли
+        кілька прив'язок поспіль далі порогу від GPS — тривога, і далі від GPS віднімається виміряний зсув.</p>
+      <label>Політ і візуальні прив'язки
+        <select id="sp-source"></select>
+      </label>
+      <p class="badge" id="sp-kind"></p>
+      <p class="hint" id="sp-source-hint"></p>
+      <button type="button" class="small" id="sp-refresh">Оновити список (нові місії з GPS)</button>
+      <p class="error" id="sp-unavailable"></p>
+    </section>
+    <section class="card">
+      <h2>Атака</h2>
+      <label>Починається з кадру <b id="sp-start-v"></b>
+        <input type="range" id="sp-start" min="0" max="200" value="80">
+      </label>
+      <label>Швидкість відтягування, м/кадр <b id="sp-rate-v"></b>
+        <input type="range" id="sp-rate" min="0.5" max="15" step="0.5" value="3">
+      </label>
+      <label>Максимальний зсув, м <b id="sp-max-v"></b>
+        <input type="range" id="sp-max" min="20" max="600" step="10" value="300">
+      </label>
+      <label>Напрям, ° від півночі <b id="sp-bearing-v"></b>
+        <input type="range" id="sp-bearing" min="0" max="359" step="1" value="135">
+      </label>
+      <h2 class="sub">Детектор</h2>
+      <label>Поріг тривоги, м <b id="sp-threshold-v"></b>
+        <input type="range" id="sp-threshold" min="5" max="60" step="1" value="15">
+      </label>
+      <label>Прив'язок поспіль для тривоги <b id="sp-confirm-v"></b>
+        <input type="range" id="sp-confirm" min="1" max="6" step="1" value="3">
+      </label>
+    </section>
+  </aside>
+  <section class="stagearea">
+    <div class="panel grow">
+      <div class="panel-head">Мапа польоту <span class="spacer"></span>
+        <select id="sp-basemap" class="mini" title="Підкладка мапи">
+          <option value="map">мапа польоту</option><option value="streets">вулиці</option><option value="satellite">супутник Esri</option>
+        </select>
+      </div>
+      <canvas id="sp-map" class="fill"></canvas>
+      <div class="legend">
+        <span><i class="sw truth"></i>справжній шлях</span>
+        <span><i class="sw spoofed"></i>підроблений GPS</span>
+        <span><i class="sw fixed"></i>після тривоги: GPS мінус зсув</span>
+        <span><i class="sw dot vis"></i>прив'язка камери</span>
+        <span><i class="sw dot alarm"></i>тривога</span>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="sp-s-alarm">—</b><span>тривога</span></div>
+      <div class="stat"><b id="sp-s-drag">—</b><span>зсув GPS на момент тривоги</span></div>
+      <div class="stat"><b id="sp-s-gps">—</b><span>похибка після тривоги, якщо вірити GPS</span></div>
+      <div class="stat"><b id="sp-s-fixed">—</b><span>похибка з виправленням камерою</span></div>
+      <div class="stat"><b id="sp-s-vis">—</b><span>похибка самих прив'язок камери</span></div>
+      <div class="stat"><b id="sp-s-false">—</b><span>хибна тривога без атаки</span></div>
+    </div>
+    <div class="card">
+      <canvas id="sp-chart" class="chart-lg"></canvas>
+    </div>
+  </section>
+</main>
+
+<!-- ============================== Degradations ============================== -->
+<main class="view hidden" data-view="stress">
+  <aside>
+    <section class="card">
+      <h2>Спотворення</h2>
+      <label>Кадри
+        <select id="st-source"></select>
+      </label>
+      <p class="badge" id="st-kind"></p>
+      <details id="st-upload-box">
+        <summary>Завантажити свій кадр</summary>
+        <label>Кадр <input type="file" id="st-frame-file" accept="image/*"></label>
+        <label>Мапа <span class="muted">(порожньо = мапа завдання)</span> <input type="file" id="st-map-file" accept="image/*"></label>
+        <label>Масштаб кадру <input type="number" id="st-scale" value="0.5" min="0.05" max="2" step="0.01"></label>
+        <button type="button" class="secondary" id="st-upload">Завантажити</button>
+        <p class="hint">Правильна відповідь — місце, де метод знаходить цей кадр без спотворень.</p>
+      </details>
+      <p class="error" id="st-error"></p>
+    </section>
+    <section class="card">
+      <label>Спотворення
+        <select id="st-axis"></select>
+      </label>
+      <label>Сила: <b id="st-level-v"></b>
+        <input type="range" id="st-level" min="0" max="5" step="1" value="0">
+      </label>
+      <label>Метод
+        <select id="st-method"></select>
+      </label>
+      <label id="st-frame-row">Кадр польоту <b id="st-frame-v"></b>
+        <input type="range" id="st-frame" min="0" max="9" step="1" value="4">
+      </label>
+      <div class="result" id="st-result">—</div>
+      <p class="muted" id="st-detail"></p>
+    </section>
+  </aside>
+  <section class="stagearea">
+    <div class="views">
+      <div class="panel">
+        <div class="panel-head">Кадр після спотворення</div>
+        <div class="cam-box"><img id="st-img" alt=""></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Де метод знайшов кадр <span class="muted">(білий пунктир — правильне місце)</span></div>
+        <canvas id="st-map" class="fill"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="controls">
+        <b>Частка знайдених кадрів залежно від сили спотворення</b>
+        <span class="spacer"></span>
+        <span class="muted" id="st-curve-status"></span>
+        <button type="button" class="small" id="st-curve-btn">Порахувати для 3 методів</button>
+      </div>
+      <canvas id="st-chart" class="chart-lg"></canvas>
+    </div>
+  </section>
+</main>
+
+<!-- ============================== Live camera ============================== -->
+<main class="view hidden" data-view="live">
+  <aside>
+    <section class="card">
+      <h2>Камера наживо</h2>
+      <p class="hint">Камера (вебкамера або телефон, підключений як вебкамера) знімає мапу на екрані; кожен кадр одразу
+        шукається на мапі. Без камери можна взяти відеофайл.</p>
+      <label>Мапа
+        <select id="lv-map"></select>
+      </label>
+      <label>Метод
+        <select id="lv-method"></select>
+      </label>
+      <label>Масштаб кадру <input type="number" id="lv-scale" value="0.5" min="0.05" max="2" step="0.01"></label>
+      <label>Джерело
+        <select id="lv-source"><option value="camera">Камера</option><option value="file">Відеофайл</option></select>
+      </label>
+      <label id="lv-camera-row">Камера <select id="lv-camera"></select></label>
+      <label id="lv-file-row" class="hidden">Відео <input type="file" id="lv-file" accept="video/*"></label>
+      <button type="button" class="primary" id="lv-start">Почати</button>
+      <button type="button" class="secondary hidden" id="lv-stop">Зупинити</button>
+      <p class="error" id="lv-error"></p>
+    </section>
+  </aside>
+  <section class="stagearea">
+    <div class="views">
+      <div class="panel">
+        <div class="panel-head">Камера</div>
+        <div class="cam-box"><video id="lv-video" muted playsinline></video>
+          <div id="lv-empty" class="empty">Натисніть «Почати»</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Мапа <span class="spacer"></span>
+          <select id="lv-basemap" class="mini hidden" title="Підкладка мапи">
+            <option value="map">мапа</option><option value="streets">вулиці</option><option value="satellite">супутник Esri</option>
+          </select>
+          <label class="toggle"><input type="checkbox" id="lv-follow" checked> Слідкувати</label></div>
+        <canvas id="lv-map-canvas" class="fill"></canvas>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="lv-s-status">—</b><span>стан</span></div>
+      <div class="stat"><b id="lv-s-fps">—</b><span>кадр/с</span></div>
+      <div class="stat"><b id="lv-s-inl">—</b><span>inliers</span></div>
+      <div class="stat"><b id="lv-s-heading">—</b><span>курс, °</span></div>
+      <div class="stat"><b id="lv-s-pos">—</b><span>позиція, px мапи</span></div>
+      <div class="stat"><b id="lv-s-reg">—</b><span>прив'язано кадрів</span></div>
+    </div>
+  </section>
+</main>
+
 <script src="app.js"></script>
+<script src="extras.js"></script>
 </body>
 </html>

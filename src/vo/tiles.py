@@ -33,6 +33,13 @@ PROVIDERS = {
         "attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
         "max_zoom": 19,
     },
+    # street map for display only (never matched): flat colours, so the "no imagery" placeholder test is skipped
+    "esri_streets": {
+        "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+        "attribution": "Esri, HERE, Garmin, (c) OpenStreetMap contributors",
+        "max_zoom": 19,
+        "placeholder_check": False,
+    },
 }
 USER_AGENT = "VisualOdometrySpectronHackathon/0.1 (research)"
 
@@ -133,7 +140,9 @@ def fetch_tile(provider: str, z: int, x: int, y: int, cache_dir: str | Path) -> 
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
     tile = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
-    return None if tile is None or is_placeholder(tile) else tile
+    if tile is None or (PROVIDERS[provider].get("placeholder_check", True) and is_placeholder(tile)):
+        return None
+    return tile
 
 
 def max_available_zoom(geo: GeoRef, z_max: int, cache_dir: str | Path = "data/cache/tiles", grid: int = 4) -> int:

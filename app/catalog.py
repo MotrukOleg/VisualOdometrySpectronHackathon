@@ -46,12 +46,21 @@ METHODS = [
 METHODS_BY_ID = {m.id: m for m in METHODS}
 
 PRESET_LABELS = {
-    "crops": "50 кадрів завдання (Standard)",
+    "crops": "Задача з ТЗ: 50 кадрів і мапа",
     "syn_easy": "Синтетика над мапою, легка (є GT)",
     "syn_hard": "Синтетика «з екрана», важка (є GT)",
     "video0061": "Відео IMG_0061: петля",
     "video0062": "Відео IMG_0062: вертикальне, складне",
     "video214816": "Третє відео: сильний крен",
+    "area_lviv": "Район: Львів, старе місто (є GT)",
+    "area_kyiv": "Район: Київ, Дніпро (є GT)",
+    "area_carpathians": "Район: Карпати, Буковель (є GT)",
+    "area_poltava": "Район: поля Полтавщини (є GT)",
+    "area_oleshky": "Район: Олешківські піски (є GT)",
+    "area_gorgany": "Район: Горгани, ліс (є GT)",
+    "area_kyiv_sea": "Район: Київське море (є GT)",
+    "area_askania": "Район: степ Асканії-Нова (є GT)",
+    "area_tylihul": "Район: Тилігульський лиман (є GT)",
 }
 
 
@@ -72,7 +81,14 @@ def presets() -> list[dict]:
             continue
         label = PRESET_LABELS.get(key) or (f"Район {key[5:]} (є GT)" if key.startswith("area_") else key)
         gt = ROOT / d["gt"] if d.get("gt") else None
+        kind = "synthetic" if key.startswith(("syn_", "area_")) else "real_nogt"
         out.append({"id": key, "label": label, "frames": str(frames), "map": str(map_path),
                     "gt": str(gt) if gt and gt.exists() else None, "frame_scale": d.get("frame_scale", 0.5),
-                    "step": d.get("step", 1)})
-    return out
+                    "step": d.get("step", 1), "geo": (map_path.parent / "geo.json").exists(), "kind": kind})
+    real = ROOT / "data" / "real" / "visloc_24"  # scripts/import_uavvisloc.py --flight data/uavvisloc/24 --zoom 19
+    if (real / "flight" / "frames").is_dir() and (real / "map.jpg").exists():
+        out.append({"id": "visloc_24", "label": "Реальний політ дрона UAV-VisLoc #24 (є GT)",
+                    "frames": str(real / "flight" / "frames"), "map": str(real / "map.jpg"),
+                    "gt": str(real / "flight" / "gt.csv"), "frame_scale": 0.3, "step": 1, "geo": True,
+                    "kind": "real"})
+    return sorted(out, key=lambda p: p["id"] != "crops")  # the task first

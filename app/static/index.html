@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mission Replay — навігація дрона за мапою</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span> Mission Replay <small>навігація дрона за супутниковою мапою</small></div>
+  <div id="job-title" class="job-title"></div>
+  <div id="stage" class="stage"></div>
+</header>
+
+<main>
+  <aside>
+    <section class="card">
+      <h2>Нова місія</h2>
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="preset">Готовий набір</button>
+        <button type="button" class="tab" data-tab="upload">Свої дані</button>
+      </div>
+      <form id="job-form">
+        <div class="tab-body" data-tab="preset">
+          <label>Набір даних
+            <select name="preset" id="preset"></select>
+          </label>
+          <p class="hint" id="preset-hint"></p>
+        </div>
+        <div class="tab-body hidden" data-tab="upload">
+          <label>Мапа <span class="muted" id="map-hint"></span>
+            <input type="file" name="map_file" accept="image/*">
+          </label>
+          <label>Кадри дрона: фото або одне відео
+            <input type="file" name="frames" id="frames-input" multiple accept="image/*,video/*">
+          </label>
+          <div class="row">
+            <label title="Для відео: брати кожен N-й кадр">Кожен N-й кадр відео
+              <input type="number" name="every" value="5" min="1" max="60">
+            </label>
+            <label title="Масштаб, до якого зменшується кадр перед пошуком на мапі. Кадри завдання ~4x детальніші за мапу">Масштаб кадру
+              <input type="number" name="frame_scale" value="0.5" min="0.1" max="2" step="0.05">
+            </label>
+          </div>
+        </div>
+        <label>Метод
+          <select name="method" id="method"></select>
+        </label>
+        <p class="hint" id="method-hint"></p>
+        <label>Максимум кадрів <span class="muted">(порожньо = усі)</span>
+          <input type="number" name="max_frames" min="1" placeholder="усі">
+        </label>
+        <button type="submit" class="primary" id="start-btn">▶ Запустити</button>
+        <p class="error" id="form-error"></p>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Місії</h2>
+      <ul id="jobs" class="jobs"></ul>
+    </section>
+  </aside>
+
+  <section class="stagearea">
+    <div class="views">
+      <div class="panel camera">
+        <div class="panel-head">Камера дрона <span id="cam-label" class="muted"></span></div>
+        <div class="cam-box"><img id="cam" alt=""><div id="cam-empty" class="empty">Запустіть місію ліворуч</div></div>
+      </div>
+      <div class="panel map">
+        <div class="panel-head">Мапа
+          <span class="spacer"></span>
+          <label class="toggle"><input type="checkbox" id="follow" checked> Слідкувати</label>
+          <label class="toggle"><input type="checkbox" id="show-fp" checked> Контури кадрів</label>
+          <button type="button" id="fit-btn" class="small">Уся мапа</button>
+        </div>
+        <canvas id="map"></canvas>
+        <div class="legend">
+          <span><i class="sw grad"></i>час: старт → фініш</span>
+          <span><i class="sw cur"></i>поточний кадр (жовтий край — верх кадру)</span>
+          <span id="legend-gt" class="hidden"><i class="sw gt"></i>справжній маршрут (GT)</span>
+          <span><i class="sw lost"></i>кадр втрачено</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><b id="s-frame">—</b><span>кадр</span></div>
+      <div class="stat"><b id="s-reg">—</b><span>прив'язано</span></div>
+      <div class="stat"><b id="s-lost">—</b><span>втрачено</span></div>
+      <div class="stat"><b id="s-inl">—</b><span>inliers (поточний / середнє)</span></div>
+      <div class="stat"><b id="s-fps">—</b><span>кадр/с</span></div>
+      <div class="stat"><b id="s-src">—</b><span>як знайдено</span></div>
+      <div class="stat hidden" id="stat-err"><b id="s-err">—</b><span>похибка vs GT, px (поточна / медіана)</span></div>
+    </div>
+
+    <div class="timeline card">
+      <div class="controls">
+        <button type="button" id="play" class="small" title="Відтворити / пауза">▶</button>
+        <select id="speed" title="Швидкість відтворення">
+          <option value="4">0.5×</option><option value="8" selected>1×</option>
+          <option value="16">2×</option><option value="40">5×</option>
+        </select>
+        <input type="range" id="slider" min="0" max="0" value="0">
+        <span id="progress" class="muted"></span>
+        <button type="button" id="cancel" class="small danger hidden">Зупинити</button>
+      </div>
+      <canvas id="chart" height="90" title="Inliers на кадр; клік — перейти до кадру"></canvas>
+      <div id="downloads" class="downloads hidden">
+        Результати:
+        <a data-file="route.png" target="_blank">route.png</a>
+        <a data-file="route_zoom.png" target="_blank">route_zoom.png</a>
+        <a data-file="trajectory.csv">trajectory.csv</a>
+        <a data-file="metrics.json" target="_blank">metrics.json</a>
+        <span id="summary" class="muted"></span>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

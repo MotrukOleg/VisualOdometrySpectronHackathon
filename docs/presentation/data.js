@@ -520,14 +520,6 @@ window.SLIDES = {
    ]
   ]
  },
- "counts": {
-  "crops": 50,
-  "videos": 3,
-  "methods": 26,
-  "pairs": 210,
-  "areas": 9,
-  "keyframes": 821
- },
  "real_table": {
   "head": [
    "Метод",
@@ -647,7 +639,7 @@ window.SLIDES = {
     95,
     0,
     45,
-    235,
+    236,
     2.8
    ],
    [
@@ -673,5 +665,118 @@ window.SLIDES = {
   "drag": 46,
   "gps": 231,
   "fixed": 3.3
+ },
+ "islands": {
+  "n": 17,
+  "ok": 13,
+  "le5": 81,
+  "le15": 92,
+  "med": 2.9,
+  "thumb_le5": 60,
+  "thumb_ok": 11,
+  "zs_ok": 5,
+  "s03_le5": 3
+ },
+ "islands_table": {
+  "head": [
+   "Матчер перевірки",
+   "кадр окремо ≤ 5 м",
+   "острови ≤ 5 м",
+   "острови ≤ 15 м",
+   "медіана, м"
+  ],
+  "rows": [
+   [
+    "LoFTR",
+    27,
+    86,
+    94,
+    2.9
+   ],
+   [
+    "Efficient LoFTR",
+    27,
+    81,
+    94,
+    2.8
+   ],
+   [
+    "XFeat",
+    27,
+    81,
+    92,
+    2.9
+   ],
+   [
+    "ALIKED+LG",
+    22,
+    72,
+    93,
+    3.1
+   ],
+   [
+    "DISK+LG",
+    21,
+    69,
+    85,
+    2.9
+   ],
+   [
+    "SuperGlue",
+    24,
+    68,
+    91,
+    3.1
+   ],
+   [
+    "SuperPoint+LG",
+    26,
+    61,
+    83,
+    3.6
+   ],
+   [
+    "SIFT+LightGlue",
+    13,
+    53,
+    88,
+    4.5
+   ],
+   [
+    "SIFT+FLANN",
+    0,
+    31,
+    80,
+    8.8
+   ]
+  ]
+ },
+ "retrieval": {
+  "thumb": 33,
+  "zs": 11,
+  "ft": 51
+ },
+ "train": {
+  "steps": 1500,
+  "batch": 32,
+  "blocks": 4,
+  "dim": 256,
+  "tau": 0.05,
+  "g0": 62.0,
+  "g1": 92.0,
+  "t0": 52.0,
+  "t1": 64.0,
+  "pairs": 891,
+  "groups": 11,
+  "minutes": 28,
+  "vram_gb": 1.4
+ },
+ "counts": {
+  "crops": 50,
+  "videos": 3,
+  "methods": 26,
+  "pairs": 210,
+  "areas": 9,
+  "keyframes": 821
  }
 };

@@ -1,0 +1,7 @@
+method,visual_fixes_%,attacks,detected_%,false_alarm_honest_gps,delay_frames_median,drag_at_alarm_m_median,drag_at_alarm_m_p90,err_after_trusting_gps_m,err_after_correction_m
+track_xfeat,29.8,42,100.0,False,15.5,46.5,96.0,231.00000000000003,3.257992708828024
+track_loftr,29.8,42,100.0,False,15.0,45.0,68.39999999999999,213.0,2.0729085254584856
+track_superpoint_lg,26.0,42,95.2,False,15.0,45.0,126.0,235.49999999999997,2.7588824209789964
+track_eloftr_official,29.4,42,100.0,False,16.0,48.0,92.1,219.0,2.3601638592883685
+track_sift_lg,13.2,42,88.1,False,27.0,81.0,171.6,263.9999999999999,3.9733815026672525
+track_sift,0.0,42,0.0,False,,,,,

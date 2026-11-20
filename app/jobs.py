@@ -10,6 +10,7 @@ import logging
 import math
 import shutil
 import subprocess
+import sys
 import threading
 import time
 import traceback
@@ -30,7 +31,8 @@ log = logging.getLogger(__name__)
 
 RESULTS_DIR = ROOT / "experiments" / "results" / "app"
 UPLOADS_DIR = ROOT / "data" / "app_uploads"
-RESULT_FILES = ("trajectory.csv", "route.png", "route_zoom.png", "metrics.json", "config.yaml")
+RESULT_FILES = ("trajectory.csv", "route.png", "route_zoom.png", "metrics.json", "config.yaml",
+                "trajectory_gps.csv", "route.geojson", "route_map.html")
 MAP_PREVIEW_LONG = 2400  # px, map image sent to the browser
 FRAME_PREVIEW_LONG = 720
 
@@ -68,6 +70,8 @@ class Job:
     video_every: int = 5
     max_frames: int | None = None
     step: int = 1
+    gt_path: Path | None = None
+    area: dict | None = None  # {lat, lon, w_km, h_km, frames}: the map is downloaded before localisation
     status: str = "queued"  # queued | running | done | error | cancelled
     created: float = field(default_factory=time.time)
     events: list = field(default_factory=list)
@@ -136,6 +140,57 @@ def extract_video(video: Path, out: Path, every: int, max_frames: int | None, on
     return written
 
 
+def build_area(job: Job) -> None:
+    """Map of any place from satellite tiles + a synthetic flight with exact GT (scripts/make_area.py)."""
+    a = job.area
+    out = UPLOADS_DIR / job.id / "area"
+    job.push("stage", {"text": f"Завантажую супутникову мапу {a['lat']:.4f}, {a['lon']:.4f}…"})
+    cmd = [sys.executable, str(ROOT / "scripts" / "make_area.py"), "--name", f"app_{job.id}",
+           "--center", f"{a['lat']},{a['lon']}", "--size-km", f"{a['w_km']}x{a['h_km']}",
+           "--frames", str(a["frames"]), "--out", str(out), "--cache", str(ROOT / "data" / "cache" / "tiles")]
+    r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if r.returncode != 0 or not (out / "map.jpg").exists():
+        raise RuntimeError("Не вдалося побудувати мапу з тайлів (немає інтернету або знімків для цих координат):\n"
+                           + (r.stderr or r.stdout)[-600:])
+    job.map_path, job.frames_dir, job.gt_path = out / "map.jpg", out / "flight" / "frames", out / "flight" / "gt.csv"
+    job.overrides += [f"map.path={job.map_path.as_posix()}", f"data.gt={job.gt_path.as_posix()}"]
+    (job.out_dir / "map_preview.jpg").unlink(missing_ok=True)
+    job.push("stage", {"text": "Мапу завантажено"})
+
+
+def export_gps(job: Job) -> None:
+    """lat/lon trajectory, GeoJSON and the interactive web map, if the map is georeferenced (geo.json next to it)."""
+    import json
+
+    import pandas as pd
+
+    from vo.gps import add_lonlat, gps_errors, gps_metrics, to_geojson, write_web_map
+    from vo.schema import read_trajectory
+    from vo.tiles import GeoRef
+
+    geo_path = job.map_path.parent / "geo.json"
+    if not geo_path.exists():
+        return
+    geo = GeoRef.load(geo_path)
+    traj = add_lonlat(read_trajectory(job.out_dir / "trajectory.csv"), geo)
+    gt = pd.read_csv(job.gt_path) if job.gt_path and job.gt_path.exists() else None
+    if gt is not None and not {"lon", "lat"} <= set(gt.columns):
+        gt = None
+    summary = {"frames": len(traj), "registered": int((traj["status"] == "map").sum()),
+               "lost": int((traj["status"] == "lost").sum()), "map resolution": f"{geo.meters_per_px():.2f} m/px"}
+    if gt is not None:
+        traj["err_m"] = gps_errors(traj, gt)
+        m = gps_metrics(traj["err_m"])
+        summary["median error"] = f"{m['gps_err_median_m']:.2f} m"
+    traj.to_csv(job.out_dir / "trajectory_gps.csv", index=False, float_format="%.7f")
+    gj = to_geojson(traj, gt)
+    (job.out_dir / "route.geojson").write_text(json.dumps(gj, separators=(",", ":")), encoding="utf-8")
+    write_web_map(gj, job.out_dir / "route_map.html", f"UAV route: {job.title}", summary)
+    lon, lat = traj.loc[traj["status"] == "map", ["lon", "lat"]].median()
+    job.push("gps", {"files": ["trajectory_gps.csv", "route.geojson", "route_map.html"],
+                     "center": [float(lat), float(lon)] if np.isfinite(lat) else None})
+
+
 class JobManager:
     """In-memory registry; jobs run one at a time (a single GPU with 4 GB is the bottleneck)."""
 
@@ -166,6 +221,8 @@ class JobManager:
         try:
             if job.cancel_requested:
                 raise Cancelled()
+            if job.area is not None:
+                build_area(job)
             if job.video_path is not None:
                 job.push("stage", {"text": "Витягую кадри з відео…"})
                 frames = UPLOADS_DIR / job.id / "frames"
@@ -180,6 +237,7 @@ class JobManager:
             cfg = load_config(ROOT / job.config, overrides)
             job.push("stage", {"text": "Рахую ознаки мапи…"})
             run_localization(cfg, job.out_dir, progress=job.push)
+            export_gps(job)
             job.status = "done"
             job.events.append({"i": len(job.events), "type": "finished", "data": {"status": "done"}})
         except Cancelled:

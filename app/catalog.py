@@ -52,6 +52,15 @@ PRESET_LABELS = {
     "video0061": "Відео IMG_0061: петля",
     "video0062": "Відео IMG_0062: вертикальне, складне",
     "video214816": "Третє відео: сильний крен",
+    "area_lviv": "Район: Львів, старе місто (є GT)",
+    "area_kyiv": "Район: Київ, Дніпро (є GT)",
+    "area_carpathians": "Район: Карпати, Буковель (є GT)",
+    "area_poltava": "Район: поля Полтавщини (є GT)",
+    "area_oleshky": "Район: Олешківські піски (є GT)",
+    "area_gorgany": "Район: Горгани, ліс (є GT)",
+    "area_kyiv_sea": "Район: Київське море (є GT)",
+    "area_askania": "Район: степ Асканії-Нова (є GT)",
+    "area_tylihul": "Район: Тилігульський лиман (є GT)",
 }
 
 
@@ -74,5 +83,10 @@ def presets() -> list[dict]:
         gt = ROOT / d["gt"] if d.get("gt") else None
         out.append({"id": key, "label": label, "frames": str(frames), "map": str(map_path),
                     "gt": str(gt) if gt and gt.exists() else None, "frame_scale": d.get("frame_scale", 0.5),
-                    "step": d.get("step", 1)})
+                    "step": d.get("step", 1), "geo": (map_path.parent / "geo.json").exists()})
+    real = ROOT / "data" / "real" / "visloc_24"  # scripts/import_uavvisloc.py --flight data/uavvisloc/24 --zoom 19
+    if (real / "flight" / "frames").is_dir() and (real / "map.jpg").exists():
+        out.append({"id": "visloc_24", "label": "Реальний політ дрона UAV-VisLoc #24 (є GT)",
+                    "frames": str(real / "flight" / "frames"), "map": str(real / "map.jpg"),
+                    "gt": str(real / "flight" / "gt.csv"), "frame_scale": 0.3, "step": 1, "geo": True})
     return out

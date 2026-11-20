@@ -27,12 +27,14 @@ from fastapi.staticfiles import StaticFiles
 from vo.io import IMG_EXTS
 
 from .catalog import DEFAULT_MAP, METHODS, METHODS_BY_ID, presets
+from .extras import router as extras_router
 from .jobs import RESULT_FILES, RESULTS_DIR, UPLOADS_DIR, Job, JobManager
 
 VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv", ".m4v", ".webm"}
 STATIC = Path(__file__).resolve().parent / "static"
 
 app = FastAPI(title="Drone Mission Replay")
+app.include_router(extras_router)
 manager = JobManager()
 
 
@@ -59,7 +61,8 @@ def _job(job_id: str) -> Job:
 @app.get("/api/info")
 def info():
     return {"methods": [m.to_dict() for m in METHODS],
-            "presets": [{"id": p["id"], "label": p["label"], "gt": bool(p["gt"])} for p in presets()],
+            "presets": [{"id": p["id"], "label": p["label"], "gt": bool(p["gt"]), "geo": p["geo"]}
+                        for p in presets()],
             "default_map": DEFAULT_MAP.exists()}
 
 
@@ -77,6 +80,9 @@ async def create_job(
     frame_scale: float | None = Form(None),
     map_file: UploadFile | None = File(None),
     frames: list[UploadFile] | None = File(None),
+    lat: float | None = Form(None),
+    lon: float | None = Form(None),
+    size_km: str | None = Form(None),
 ):
     m = METHODS_BY_ID.get(method)
     if m is None:
@@ -86,16 +92,29 @@ async def create_job(
     job_id = manager.new_id()
     up = UPLOADS_DIR / job_id
     overrides = [f"name=app_{m.id}"]
-    video, frames_dir, step = None, None, 1
+    video, frames_dir, step, gt_path, area = None, None, 1, None, None
     max_frames = max_frames or None
 
-    if preset:
+    if lat is not None and lon is not None:
+        if not (-85 <= lat <= 85 and -180 <= lon <= 180):
+            raise HTTPException(400, "координати поза межами мапи")
+        try:
+            w_km, h_km = (float(v) for v in (size_km or "2x1.2").lower().replace("х", "x").split("x"))
+        except ValueError:
+            raise HTTPException(400, "розмір ділянки як 2x1.2 (км)")
+        if not (0.3 <= w_km <= 6 and 0.3 <= h_km <= 6):
+            raise HTTPException(400, "розмір ділянки 0.3–6 км по кожній стороні")
+        area = {"lat": lat, "lon": lon, "w_km": w_km, "h_km": h_km, "frames": min(max_frames or 60, 150)}
+        map_path, fs = up / "area" / "map.jpg", frame_scale or 0.5
+        title = f"Координати {lat:.4f}, {lon:.4f}"
+    elif preset:
         p = next((p for p in presets() if p["id"] == preset), None)
         if p is None:
             raise HTTPException(400, f"набір {preset!r} не знайдено локально")
         map_path, frames_dir, step = Path(p["map"]), Path(p["frames"]), int(p.get("step", 1))
         if p["gt"]:
-            overrides.append(f"data.gt={Path(p['gt']).as_posix()}")
+            gt_path = Path(p["gt"])
+            overrides.append(f"data.gt={gt_path.as_posix()}")
         fs = frame_scale or p["frame_scale"]
         title = p["label"]
     else:
@@ -125,11 +144,13 @@ async def create_job(
                 await _save(f, frames_dir / _safe_name(f.filename))
             title = f"{len(files)} фото"
         fs = frame_scale or 0.5
-    overrides += [f"map.path={Path(map_path).as_posix()}", f"localize.frame_scale={fs}"]
+    overrides.append(f"localize.frame_scale={fs}")
+    if area is None:
+        overrides.append(f"map.path={Path(map_path).as_posix()}")
 
     job = Job(id=job_id, title=title, method=m.label, map_path=Path(map_path), frames_dir=frames_dir,
               out_dir=RESULTS_DIR / job_id, overrides=overrides, config=m.config, video_path=video,
-              video_every=max(1, every), max_frames=max_frames, step=step)
+              video_every=max(1, every), max_frames=max_frames, step=step, gt_path=gt_path, area=area)
     manager.submit(job)
     return {"id": job.id}
 
@@ -157,7 +178,10 @@ async def events(job_id: str, start: int = 0):
 
 @app.get("/api/jobs/{job_id}/map")
 def job_map(job_id: str):
-    return FileResponse(manager.map_preview(_job(job_id)), media_type="image/jpeg")
+    job = _job(job_id)
+    if not job.map_path.exists():
+        raise HTTPException(404, "map is not ready yet")
+    return FileResponse(manager.map_preview(job), media_type="image/jpeg")
 
 
 @app.get("/api/jobs/{job_id}/frame/{k}")

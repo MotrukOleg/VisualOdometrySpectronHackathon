@@ -19,7 +19,7 @@ const S = {
 const fin = (v) => v !== null && v !== undefined && Number.isFinite(v);
 const timeColor = (k, a = 1) => {
   const t = S.n > 1 ? k / (S.n - 1) : 0;
-  return `hsla(${230 - 230 * t}, 85%, 56%, ${a})`;
+  return `hsla(${45 - 40 * t}, 82%, ${70 - 12 * t}%, ${a})`; // light amber -> orange -> red
 };
 const fmt = (v, d = 1) => (fin(v) ? v.toFixed(d) : "—");
 const median = (a) => {
@@ -55,7 +55,8 @@ async function init() {
     for (const p of S.info.presets) ps.add(new Option(p.label, p.id));
     ps.onchange = () => {
       const p = S.info.presets.find((x) => x.id === ps.value);
-      $("preset-hint").textContent = p?.gt ? "Є точний GT: побачите справжній маршрут і похибку." : "";
+      $("preset-hint").textContent = [p?.gt ? "Є точний GT: побачите справжній маршрут і похибку." : "",
+        p?.geo ? "Мапа з геоприв'язкою: маршрут вийде і в GPS (інтерактивна мапа, GeoJSON)." : ""].join(" ");
     };
     ps.onchange();
   } else {
@@ -98,8 +99,12 @@ async function submitJob(ev) {
   ev.preventDefault();
   $("form-error").textContent = "";
   const fd = new FormData($("job-form"));
-  const upload = !document.querySelector('.tab-body[data-tab="upload"]').classList.contains("hidden");
-  if (upload) {
+  const tab = document.querySelector(".tab.active").dataset.tab;
+  if (tab !== "coords") for (const k of ["lat", "lon", "size_km"]) fd.delete(k);
+  if (tab === "coords") {
+    for (const k of ["preset", "map_file", "frames", "every", "frame_scale"]) fd.delete(k);
+    if (!fd.get("lat") || !fd.get("lon")) { $("form-error").textContent = "Вкажіть широту й довготу."; return; }
+  } else if (tab === "upload") {
     fd.delete("preset");
     if (!$("frames-input").files.length) { $("form-error").textContent = "Оберіть фото кадрів або відео."; return; }
     if (!fd.get("map_file")?.size) fd.delete("map_file");
@@ -153,20 +158,25 @@ function openJob(id) {
   $("cam-empty").classList.remove("hidden");
   $("cam-empty").textContent = "Очікую кадри…";
   $("downloads").classList.add("hidden");
+  $("gps-links").classList.add("hidden");
   $("legend-gt").classList.add("hidden");
   $("stat-err").classList.add("hidden");
   $("cancel").classList.remove("hidden");
   $("stage").textContent = "У черзі…";
   $("follow").checked = true;
-  const img = new Image();
-  img.onload = () => { S.mapImg = img; if (!S.mapSize) fitMap(); S.dirty = true; };
-  img.src = `/api/jobs/${id}/map`;
   S.mapImg = null;
+  loadJobMap(id);
   const es = new EventSource(`/api/jobs/${id}/events`);
   S.es = es;
   es.onmessage = (m) => handle(JSON.parse(m.data));
   es.onerror = () => { if (S.status) es.close(); };
   updateAll();
+}
+
+function loadJobMap(id) { // the map of a coordinates job exists only after the tiles are downloaded
+  const img = new Image();
+  img.onload = () => { if (S.jobId !== id) return; S.mapImg = img; if (!S.mapSize) fitMap(); S.dirty = true; };
+  img.src = `/api/jobs/${id}/map?t=${Date.now()}`;
 }
 
 function handle(e) {
@@ -185,6 +195,7 @@ function handle(e) {
       $("legend-gt").classList.toggle("hidden", !S.gt);
       $("stat-err").classList.toggle("hidden", !S.gt);
       $("stage").textContent = `Локалізація: ${d.n_frames} кадрів (${d.device})`;
+      if (!S.mapImg) loadJobMap(S.jobId);
       if (!$("follow").checked) fitMap();
       break;
     case "frame":
@@ -197,6 +208,10 @@ function handle(e) {
       S.final = d.trajectory; S.metrics = d.metrics;
       showDownloads();
       S.dirty = true;
+      break;
+    case "gps":
+      $("gps-links").classList.remove("hidden");
+      showDownloads();
       break;
     case "finished":
       S.status = d.status;
@@ -332,7 +347,7 @@ function drawChart() {
       ctx.fillStyle = timeColor(k, k <= S.cur ? 0.95 : 0.35);
       ctx.fillRect(k * bw, H - h, Math.max(1, bw - (bw > 3 ? 1 : 0)), h);
     } else {
-      ctx.fillStyle = "rgba(239,68,68,.9)";
+      ctx.fillStyle = "rgba(224,86,75,.9)";
       ctx.fillRect(k * bw, H - 6, Math.max(1, bw), 6);
     }
   });
@@ -340,7 +355,7 @@ function drawChart() {
     ctx.fillStyle = "#fff";
     ctx.fillRect((S.cur + 0.5) * bw - 1, 0, 2, H);
   }
-  ctx.fillStyle = "#8b98a8";
+  ctx.fillStyle = "#9a9a9a";
   ctx.font = `${12 * devicePixelRatio}px Segoe UI, sans-serif`;
   ctx.fillText(`inliers (макс. ${maxInl})`, 6, 14 * devicePixelRatio);
 }
@@ -489,9 +504,9 @@ function drawMap() {
     ctx.fillStyle = p.interp ? "rgba(255,255,255,.6)" : timeColor(k);
     ctx.beginPath(); ctx.arc(x, y, 2.6 * dpr, 0, 7); ctx.fill();
   }
-  if (start) marker(ctx, start, "#22c55e", "START");
+  if (start) marker(ctx, start, "#3f9a6c", "START");
   const done = S.status === "done" && S.cur === S.frames.length - 1;
-  if (done && prev) marker(ctx, prev.q, "#ef4444", "FINISH");
+  if (done && prev) marker(ctx, prev.q, "#c9473d", "FINISH");
 
   // current frame
   const r = S.frames[S.cur];
@@ -507,7 +522,7 @@ function drawMap() {
     const top = [(cs[0][0] + cs[1][0]) / 2, (cs[0][1] + cs[1][1]) / 2];
     const L = Math.hypot(top[0] - cx, top[1] - cy) || 1, len = Math.min(L, 46 * dpr);
     arrow(ctx, cx, cy, cx + ((top[0] - cx) / L) * len, cy + ((top[1] - cy) / L) * len);
-    ctx.fillStyle = "#ef4444"; ctx.strokeStyle = "#fff"; ctx.lineWidth = 2 * dpr;
+    ctx.fillStyle = "#e0564b"; ctx.strokeStyle = "#fff"; ctx.lineWidth = 2 * dpr;
     ctx.beginPath(); ctx.arc(cx, cy, 6 * dpr, 0, 7); ctx.fill(); ctx.stroke();
   } else if (r) {
     const p = lastPoint(S.cur);
@@ -515,7 +530,7 @@ function drawMap() {
     ctx.font = `600 ${14 * dpr}px Segoe UI, sans-serif`;
     const txt = "кадр втрачено — повторний пошук по мапі";
     const w = ctx.measureText(txt).width;
-    ctx.fillStyle = "rgba(127,29,29,.9)";
+    ctx.fillStyle = "rgba(92,36,32,.92)";
     ctx.fillRect(x + 12 * dpr, y - 26 * dpr, w + 16 * dpr, 24 * dpr);
     ctx.fillStyle = "#fff";
     ctx.fillText(txt, x + 20 * dpr, y - 9 * dpr);

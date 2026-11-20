@@ -1,0 +1,22 @@
+{
+  "embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]",
+  "verify": "track_eloftr_official",
+  "frames": 235,
+  "islands": 17,
+  "placed_%": 98.3,
+  "status": {
+    "island_verified": 148,
+    "map": 72,
+    "island": 11,
+    "unplaced": 4
+  },
+  "islands_s": 0.0,
+  "retrieval_s": 21.6,
+  "fit_s": 1.7,
+  "verify_s": 42.5,
+  "le_5m_%": 81.3,
+  "le_15m_%": 93.6,
+  "le_50m_%": 93.6,
+  "err_m_median_placed": 2.8,
+  "islands_correct": 13
+}

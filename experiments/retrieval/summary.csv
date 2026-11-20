@@ -1,0 +1,16 @@
+dataset,embedder,rotations,frames,n,tiles,tile_px,recall@1_%,recall@5_%,recall@10_%,top1_err_m_median,ms_query,s_index
+visloc_24,thumb,0,all,235,2448,230,14.9,25.5,32.8,386.5,4.2,0.4
+visloc_24,thumb,0,matchable,98,2448,230,27.6,43.9,52.0,284.0,4.2,0.4
+visloc_24,thumb,0,unmatchable,137,2448,230,5.8,12.4,19.0,478.9,4.2,0.4
+visloc_24,"dinov2[dinov2-small,224,cls]",0,all,235,2448,230,4.3,7.7,10.6,335.7,64.9,93.6
+visloc_24,"dinov2[dinov2-small,224,cls]",0,matchable,98,2448,230,10.2,15.3,20.4,192.5,64.9,93.6
+visloc_24,"dinov2[dinov2-small,224,cls]",0,unmatchable,137,2448,230,0.0,2.2,3.6,489.3,64.9,93.6
+visloc_24,"dinov2[dinov2-small,224,mean]",0,all,235,2448,230,2.6,9.4,12.3,419.0,62.8,92.6
+visloc_24,"dinov2[dinov2-small,224,mean]",0,matchable,98,2448,230,4.1,20.4,25.5,258.5,62.8,92.6
+visloc_24,"dinov2[dinov2-small,224,mean]",0,unmatchable,137,2448,230,1.5,1.5,2.9,532.3,62.8,92.6
+visloc_24,"dinov2[dinov2-small,224,cls_mean]",0,all,235,2448,230,3.0,8.5,11.9,377.7,62.8,93.4
+visloc_24,"dinov2[dinov2-small,224,cls_mean]",0,matchable,98,2448,230,6.1,18.4,25.5,248.7,62.8,93.4
+visloc_24,"dinov2[dinov2-small,224,cls_mean]",0,unmatchable,137,2448,230,0.7,1.5,2.2,538.8,62.8,93.4
+visloc_24,"dinov2[dinov2-small,224,head,ft=dinov2s_ft]",0,all,235,2448,230,25.5,40.4,50.6,315.2,63.0,92.8
+visloc_24,"dinov2[dinov2-small,224,head,ft=dinov2s_ft]",0,matchable,98,2448,230,53.1,73.5,80.6,22.1,63.0,92.8
+visloc_24,"dinov2[dinov2-small,224,head,ft=dinov2s_ft]",0,unmatchable,137,2448,230,5.8,16.8,29.2,538.1,63.0,92.8

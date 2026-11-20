@@ -1,0 +1,21 @@
+{
+  "embedder": "thumb",
+  "verify": "track_xfeat",
+  "frames": 235,
+  "islands": 17,
+  "placed_%": 100.0,
+  "status": {
+    "island_verified": 137,
+    "map": 52,
+    "island": 46
+  },
+  "islands_s": 0.0,
+  "retrieval_s": 2.5,
+  "fit_s": 1.7,
+  "verify_s": 24.9,
+  "le_5m_%": 60.4,
+  "le_15m_%": 75.3,
+  "le_50m_%": 80.4,
+  "err_m_median_placed": 3.65,
+  "islands_correct": 11
+}

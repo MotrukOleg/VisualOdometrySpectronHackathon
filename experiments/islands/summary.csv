@@ -1,0 +1,6 @@
+run,embedder,verify,islands_correct,placed_%,le_5m_%,le_15m_%,le_50m_%,err_m_median_placed
+visloc_24_dinoft_noverify,"dinov2[dinov2-small,224,head,ft=dinov2s_ft]",,13,98.3,31.1,80.0,93.6,8.78
+visloc_24_dinoft_xfeat,"dinov2[dinov2-small,224,head,ft=dinov2s_ft]",track_xfeat,13,98.3,80.9,91.9,93.6,2.86
+visloc_24_dinov2_pooling_cls_noverify,"dinov2[dinov2-small,224,cls]",,5,98.7,0.0,3.0,33.2,123.02
+visloc_24_thumb_noverify,thumb,,10,100.0,14.0,50.2,74.9,14.93
+visloc_24_thumb_xfeat,thumb,track_xfeat,11,100.0,60.4,75.3,80.4,3.65

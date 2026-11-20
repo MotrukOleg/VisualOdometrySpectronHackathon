@@ -1,0 +1,22 @@
+{
+  "embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]",
+  "verify": "track_disk_lg",
+  "frames": 235,
+  "islands": 17,
+  "placed_%": 98.3,
+  "status": {
+    "island_verified": 159,
+    "map": 54,
+    "island": 18,
+    "unplaced": 4
+  },
+  "islands_s": 0.0,
+  "retrieval_s": 21.6,
+  "fit_s": 1.7,
+  "verify_s": 111.7,
+  "le_5m_%": 68.9,
+  "le_15m_%": 84.7,
+  "le_50m_%": 93.6,
+  "err_m_median_placed": 2.89,
+  "islands_correct": 13
+}

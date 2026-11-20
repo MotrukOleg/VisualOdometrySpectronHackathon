@@ -1,0 +1,18 @@
+=== track_sift
+{"embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]", "verify": "track_sift", "frames": 235, "islands": 17, "placed_%": 98.3, "status": {"island": 231, "unplaced": 4}, "islands_s": 0.0, "retrieval_s": 22.6, "fit_s": 1.8, "verify_s": 273.0, "le_5m_%": 31.1, "le_15m_%": 80.0, "le_50m_%": 93.6, "err_m_median_placed": 8.78, "islands_correct": 13}
+=== track_sift_lg
+{"embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]", "verify": "track_sift_lg", "frames": 235, "islands": 17, "placed_%": 98.3, "status": {"island_verified": 182, "map": 31, "island": 18, "unplaced": 4}, "islands_s": 0.0, "retrieval_s": 21.6, "fit_s": 1.7, "verify_s": 85.2, "le_5m_%": 53.2, "le_15m_%": 87.7, "le_50m_%": 93.6, "err_m_median_placed": 4.52, "islands_correct": 13}
+=== track_superpoint_lg
+{"embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]", "verify": "track_superpoint_lg", "frames": 235, "islands": 17, "placed_%": 98.3, "status": {"island_verified": 155, "map": 54, "island": 22, "unplaced": 4}, "islands_s": 0.0, "retrieval_s": 21.7, "fit_s": 1.7, "verify_s": 32.5, "le_5m_%": 61.3, "le_15m_%": 82.6, "le_50m_%": 93.6, "err_m_median_placed": 3.56, "islands_correct": 13}
+=== track_aliked_lg
+{"embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]", "verify": "track_aliked_lg", "frames": 235, "islands": 17, "placed_%": 98.3, "status": {"island_verified": 142, "map": 51, "island": 38, "unplaced": 4}, "islands_s": 0.0, "retrieval_s": 21.8, "fit_s": 1.7, "verify_s": 64.8, "le_5m_%": 71.9, "le_15m_%": 92.8, "le_50m_%": 93.6, "err_m_median_placed": 3.1, "islands_correct": 13}
+=== track_disk_lg
+{"embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]", "verify": "track_disk_lg", "frames": 235, "islands": 17, "placed_%": 98.3, "status": {"island_verified": 159, "map": 54, "island": 18, "unplaced": 4}, "islands_s": 0.0, "retrieval_s": 21.6, "fit_s": 1.7, "verify_s": 111.7, "le_5m_%": 68.9, "le_15m_%": 84.7, "le_50m_%": 93.6, "err_m_median_placed": 2.89, "islands_correct": 13}
+=== track_xfeat
+{"embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]", "verify": "track_xfeat", "frames": 235, "islands": 17, "placed_%": 98.3, "status": {"island_verified": 143, "map": 66, "island": 22, "unplaced": 4}, "islands_s": 0.0, "retrieval_s": 21.7, "fit_s": 1.7, "verify_s": 16.9, "le_5m_%": 80.9, "le_15m_%": 91.9, "le_50m_%": 93.6, "err_m_median_placed": 2.86, "islands_correct": 13}
+=== track_eloftr_official
+{"embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]", "verify": "track_eloftr_official", "frames": 235, "islands": 17, "placed_%": 98.3, "status": {"island_verified": 148, "map": 72, "island": 11, "unplaced": 4}, "islands_s": 0.0, "retrieval_s": 21.6, "fit_s": 1.7, "verify_s": 42.5, "le_5m_%": 81.3, "le_15m_%": 93.6, "le_50m_%": 93.6, "err_m_median_placed": 2.8, "islands_correct": 13}
+=== track_loftr
+{"embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]", "verify": "track_loftr", "frames": 235, "islands": 17, "placed_%": 98.3, "status": {"island_verified": 148, "map": 72, "island": 11, "unplaced": 4}, "islands_s": 0.0, "retrieval_s": 21.7, "fit_s": 1.7, "verify_s": 67.7, "le_5m_%": 86.4, "le_15m_%": 93.6, "le_50m_%": 93.6, "err_m_median_placed": 2.87, "islands_correct": 13}
+=== track_superglue_official
+{"embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]", "verify": "track_superglue_official", "frames": 235, "islands": 17, "placed_%": 98.3, "status": {"island_verified": 149, "map": 53, "island": 29, "unplaced": 4}, "islands_s": 0.0, "retrieval_s": 21.5, "fit_s": 1.7, "verify_s": 47.6, "le_5m_%": 67.7, "le_15m_%": 91.1, "le_50m_%": 93.6, "err_m_median_placed": 3.06, "islands_correct": 13}

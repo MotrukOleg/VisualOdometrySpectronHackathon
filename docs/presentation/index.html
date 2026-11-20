@@ -401,16 +401,17 @@
   <h2>SIFT + LightGlue: стабільно в трійці найкращих на всіх тестах</h2>
   <table data-table="decision" data-units="|px|%|%|%" data-hl="0" data-bl="3"></table>
   <div class="cols small" style="margin-top:0.4em">
-    <ul>
-      <li class="fragment">Найкращий на найважчих парах; поля <span data-k="decision.rows.0.4"></span> % проти
-        <span data-k="decision.rows.3.4"></span> % у бейзлайну</li>
-      <li class="fragment">Точки SIFT — субпіксельні, на чистих даних не гірший за бейзлайн</li>
-      <li class="fragment">~0.2 ГБ відеопам'яті — працює на GTX 1650; вільна ліцензія</li>
-    </ul>
+      <ul>
+          <li class="fragment">
+              Найкращий на найважчих парах; поля <span data-k="decision.rows.0.4"></span> % проти
+              <span data-k="decision.rows.3.4"></span> % у бейзлайну
+          </li>
+          <li class="fragment">Точки SIFT — субпіксельні, на чистих даних не гірший за бейзлайн</li>
+          <li class="fragment">Ініціалізація й повернення після втрати — SIFT + FLANN по всій мапі</li>
+      </ul>
     <ul>
       <li class="fragment"><span class="muted">DISK + LightGlue</span> — найкращий на полях, але до ~12 ГБ VRAM</li>
       <li class="fragment"><span class="muted">LoFTR</span> — найкращий над водою, слабший на парах і менш плавний на відео</li>
-      <li class="fragment">Ініціалізація й повернення після втрати — SIFT + FLANN по всій мапі</li>
     </ul>
   </div>
   <aside class="notes" data-speaker="Людина 1" data-time="1:00">
@@ -449,7 +450,7 @@
   <table data-table="final_full" data-units="||||||||" data-hl="-1"></table>
   <div class="note small">Усі кадри прив'язано на всіх чотирьох наборах. Δ від бейзлайну — відстань між маршрутами
     фінального методу і SIFT + FLANN: менше 1 px мапи, тобто на даних завдання обидва методи дають той самий маршрут;
-    перевага фінального — стійкість на складній місцевості. Швидкість і пам'ять — на GTX 1650.</div>
+    перевага фінального — стійкість на складній місцевості.</div>
   <aside class="notes" data-speaker="Людина 1" data-time="0:40">
     І те саме в цифрах для всіх наших даних. На всіх чотирьох наборах — і кадрах завдання, і трьох відео — прив'язано
     сто відсотків кадрів. Похибка репроєкції — близько пікселя. Маршрут фінального методу відрізняється від
@@ -577,9 +578,6 @@
     </ul>
     <ul>
       <li><b>Efficient LoFTR із transformers</b> — лише грубі відповідності (сітка 8 px); офіційна версія працює</li>
-      <li><b>Баг геометрії</b> (виправлено, PR #7): нахилені гомографії відкидались як «reflection»</li>
-      <li><b>Баги трекінгу</b> (виправлено): після хибної прив'язки вікно мапи виходило за межі мапи</li>
-      <li class="tiny">Ваги SuperPoint / SuperGlue (Magic Leap) — некомерційна ліцензія</li>
     </ul>
   </div>
   <div class="cols-2-3" style="margin-top:0.3em">
@@ -629,7 +627,6 @@
       </ul>
     </div>
   </div>
-  <pre class="fragment"><code class="language-powershell" data-trim>python scripts/localize.py --config configs/map/final.yaml --map data/train/global_map.png --frames data/train/crops</code></pre>
   <aside class="notes" data-speaker="Людина 4" data-time="0:40">
     Підсумуємо. Усі <span data-k="final.crops.n"></span> кадрів завдання і всі <span data-k="counts.keyframes"></span>
     ключових кадрів наших відео прив'язано до мапи. Ми порівняли <span data-k="counts.methods"></span> конфігурацій

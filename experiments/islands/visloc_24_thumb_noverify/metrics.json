@@ -1,0 +1,18 @@
+{
+  "embedder": "thumb",
+  "verify": null,
+  "frames": 235,
+  "islands": 17,
+  "placed_%": 100.0,
+  "status": {
+    "island": 235
+  },
+  "islands_s": 86.5,
+  "retrieval_s": 2.8,
+  "fit_s": 1.7,
+  "le_5m_%": 14.0,
+  "le_15m_%": 50.2,
+  "le_50m_%": 74.9,
+  "err_m_median_placed": 14.93,
+  "islands_correct": 10
+}

@@ -1,0 +1,19 @@
+{
+  "embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]",
+  "verify": null,
+  "frames": 235,
+  "islands": 17,
+  "placed_%": 98.3,
+  "status": {
+    "island": 231,
+    "unplaced": 4
+  },
+  "islands_s": 0.0,
+  "retrieval_s": 21.8,
+  "fit_s": 1.7,
+  "le_5m_%": 31.1,
+  "le_15m_%": 80.0,
+  "le_50m_%": 93.6,
+  "err_m_median_placed": 8.78,
+  "islands_correct": 13
+}

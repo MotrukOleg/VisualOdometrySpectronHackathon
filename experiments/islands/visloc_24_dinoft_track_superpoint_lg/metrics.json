@@ -1,0 +1,22 @@
+{
+  "embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]",
+  "verify": "track_superpoint_lg",
+  "frames": 235,
+  "islands": 17,
+  "placed_%": 98.3,
+  "status": {
+    "island_verified": 155,
+    "map": 54,
+    "island": 22,
+    "unplaced": 4
+  },
+  "islands_s": 0.0,
+  "retrieval_s": 21.7,
+  "fit_s": 1.7,
+  "verify_s": 32.5,
+  "le_5m_%": 61.3,
+  "le_15m_%": 82.6,
+  "le_50m_%": 93.6,
+  "err_m_median_placed": 3.56,
+  "islands_correct": 13
+}

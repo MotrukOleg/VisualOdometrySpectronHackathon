@@ -1,0 +1,22 @@
+{
+  "embedder": "dinov2[dinov2-small,224,head,ft=dinov2s_ft]",
+  "verify": "track_superglue_official",
+  "frames": 235,
+  "islands": 17,
+  "placed_%": 98.3,
+  "status": {
+    "island_verified": 149,
+    "map": 53,
+    "island": 29,
+    "unplaced": 4
+  },
+  "islands_s": 0.0,
+  "retrieval_s": 21.5,
+  "fit_s": 1.7,
+  "verify_s": 47.6,
+  "le_5m_%": 67.7,
+  "le_15m_%": 91.1,
+  "le_50m_%": 93.6,
+  "err_m_median_placed": 3.06,
+  "islands_correct": 13
+}

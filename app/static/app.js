@@ -8,11 +8,23 @@ const SOURCE_LABELS = {
   reinit: "повторний пошук", tiles: "перебір тайлів", lost: "втрачено",
 };
 
+const KIND = {
+  synthetic: ["Синтетика", "Кадри вирізані з того самого знімка, що й мапа: похибка оптимістична."],
+  real: ["Реальні дані, є GPS", "Реальні кадри зі справжнім GPS: похибка в метрах справжня."],
+  real_nogt: ["Реальні кадри, без правильної відповіді", "Видно, чи кадр прив'язався і чи маршрут плавний; точної похибки немає."],
+};
+function setKind(el, kind, hintEl) {
+  const k = KIND[kind];
+  el.textContent = k ? k[0] : "";
+  el.className = `badge ${el.classList.contains("inline") ? "inline " : ""}${kind || ""}`;
+  if (hintEl) hintEl.textContent = k ? k[1] : "";
+}
+
 const S = {
   info: null, jobId: null, es: null, status: "", n: 0, names: [], mapSize: null, gt: null,
   frames: [], final: null, metrics: null, cur: -1, live: true, playTimer: null,
   mapImg: null, view: { s: 1, ox: 0, oy: 0 }, target: null, dirty: true, drag: null,
-  camShown: -1, camPending: -1, camLoading: false, nextEvent: 0, initK: null,
+  camShown: -1, camPending: -1, camLoading: false, nextEvent: 0, initK: null, lastStep: 0, geo: false,
 };
 
 // ---------- helpers ----------
@@ -55,8 +67,9 @@ async function init() {
     for (const p of S.info.presets) ps.add(new Option(p.label, p.id));
     ps.onchange = () => {
       const p = S.info.presets.find((x) => x.id === ps.value);
-      $("preset-hint").textContent = [p?.gt ? "Є точний GT: побачите справжній маршрут і похибку." : "",
-        p?.geo ? "Мапа з геоприв'язкою: маршрут вийде і в GPS (інтерактивна мапа, GeoJSON)." : ""].join(" ");
+      setKind($("preset-kind"), p?.kind);
+      $("preset-hint").textContent = [KIND[p?.kind]?.[1] || "",
+        p?.geo ? "Маршрут вийде і в GPS: інтерактивна мапа, GeoJSON, CSV." : ""].join(" ");
     };
     ps.onchange();
   } else {
@@ -64,7 +77,19 @@ async function init() {
     o.disabled = true; ps.add(o); ps.value = "";
     switchTab("upload");
   }
-  $("map-hint").textContent = S.info.default_map ? "(необов'язково — за замовчуванням мапа завдання)" : "(обов'язково)";
+  const uploadHints = () => {
+    const gps = !!$("gps-input").files.length, map = !!$("map-input").files.length;
+    $("map-hint").textContent = gps ? "(необов'язково: без неї мапа збудується з тайлів за GPS)"
+      : S.info.default_map ? "(необов'язково: за замовчуванням мапа завдання)" : "(обов'язково)";
+    $("geo-row").classList.toggle("hidden", !(gps && map));
+    $("zoom-row").classList.toggle("hidden", !(gps && !map));
+  };
+  $("gps-input").onchange = uploadHints;
+  $("map-input").onchange = uploadHints;
+  uploadHints();
+  $("speed").onchange = () => (S.lastStep = 0);
+  $("basemap").onchange = () => loadJobMap(S.jobId);
+  setInterval(pace, 40);
 
   document.querySelectorAll(".tab").forEach((b) => (b.onclick = () => switchTab(b.dataset.tab)));
   $("job-form").onsubmit = submitJob;
@@ -106,6 +131,8 @@ async function submitJob(ev) {
     if (!fd.get("lat") || !fd.get("lon")) { $("form-error").textContent = "Вкажіть широту й довготу."; return; }
   } else if (tab === "upload") {
     fd.delete("preset");
+    if (!fd.get("gps_file")?.size) { fd.delete("gps_file"); fd.delete("zoom"); }
+    if (!fd.get("geo_file")?.size) fd.delete("geo_file");
     if (!$("frames-input").files.length) { $("form-error").textContent = "Оберіть фото кадрів або відео."; return; }
     if (!fd.get("map_file")?.size) fd.delete("map_file");
   } else {
@@ -151,8 +178,11 @@ function openJob(id) {
   stopPlay();
   Object.assign(S, {
     jobId: id, status: "", n: 0, names: [], mapSize: null, gt: null, frames: [], final: null, metrics: null,
-    cur: -1, live: true, camShown: -1, camPending: -1, target: null, dirty: true, nextEvent: 0,
+    cur: -1, live: true, camShown: -1, camPending: -1, target: null, dirty: true, nextEvent: 0, geo: false,
   });
+  $("basemap").value = "map";
+  $("basemap").classList.add("hidden");
+  setKind($("job-kind"), "");
   location.hash = `job=${id}`;
   $("cam").removeAttribute("src");
   $("cam-empty").classList.remove("hidden");
@@ -173,10 +203,21 @@ function openJob(id) {
   updateAll();
 }
 
-function loadJobMap(id) { // the map of a coordinates job exists only after the tiles are downloaded
+function loadJobMap(id) { // the map of a coordinates / GPS job exists only after the tiles are downloaded
+  const kind = $("basemap").value;
   const img = new Image();
   img.onload = () => { if (S.jobId !== id) return; S.mapImg = img; if (!S.mapSize) fitMap(); S.dirty = true; };
-  img.src = `/api/jobs/${id}/map?t=${Date.now()}`;
+  img.onerror = () => { if (kind !== "map") { $("form-error").textContent = "Підкладка недоступна (немає інтернету?)"; $("basemap").value = "map"; } };
+  img.src = kind === "map" ? `/api/jobs/${id}/map?t=${Date.now()}` : `/api/jobs/${id}/basemap/${kind}`;
+}
+
+// Frames arrive as fast as they are computed; they are shown at the chosen pace (frames per second).
+function pace() {
+  if (!S.live || S.playTimer || S.cur >= S.frames.length - 1) return;
+  const now = performance.now();
+  if (now - S.lastStep < 1000 / +$("speed").value) return;
+  S.lastStep = now;
+  seek(S.cur + 1, true);
 }
 
 function handle(e) {
@@ -190,6 +231,11 @@ function handle(e) {
     case "stage":
       $("stage").textContent = d.text;
       break;
+    case "meta":
+      setKind($("job-kind"), d.kind);
+      S.geo = d.geo;
+      $("basemap").classList.toggle("hidden", !d.geo);
+      break;
     case "start":
       S.n = d.n_frames; S.names = d.names; S.mapSize = d.map_size; S.gt = d.gt;
       $("legend-gt").classList.toggle("hidden", !S.gt);
@@ -201,8 +247,8 @@ function handle(e) {
     case "frame":
       S.frames.push(d);
       if (S.initK !== null && S.frames.length - 1 >= S.initK) { seek(S.initK, false); S.live = false; S.initK = null; }
-      else if (S.live) seek(S.frames.length - 1, true);
-      else updateTimeline();
+      else if (S.live && S.cur < 0) seek(0, true);
+      else { updateTimeline(); drawChart(); }
       break;
     case "done":
       S.final = d.trajectory; S.metrics = d.metrics;
@@ -243,7 +289,7 @@ function showDownloads() {
 function seek(k, live) {
   if (!S.frames.length) return;
   S.cur = Math.max(0, Math.min(k, S.frames.length - 1));
-  S.live = live || S.cur === S.frames.length - 1 && S.status === "";
+  S.live = live;
   S.dirty = true;
   requestCamera(S.cur);
   updateAll();
@@ -252,7 +298,7 @@ function updateTimeline() {
   const sl = $("slider");
   sl.max = Math.max(0, S.frames.length - 1);
   sl.value = Math.max(0, S.cur);
-  $("progress").textContent = S.n ? `${S.frames.length} / ${S.n} оброблено` : "";
+  $("progress").textContent = S.n ? `показано ${S.cur + 1} · пораховано ${S.frames.length} / ${S.n}` : "";
 }
 function togglePlay() { S.playTimer ? stopPlay() : startPlay(); }
 function startPlay() {
@@ -260,7 +306,7 @@ function startPlay() {
   if (S.cur >= S.frames.length - 1) seek(0, false);
   $("play").textContent = "⏸";
   const tick = () => {
-    if (S.cur >= S.frames.length - 1) { stopPlay(); S.live = true; return; }
+    if (S.cur >= S.frames.length - 1) { stopPlay(); return; }
     seek(S.cur + 1, false);
     S.playTimer = setTimeout(tick, 1000 / +$("speed").value);
   };

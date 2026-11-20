@@ -1,4 +1,6 @@
 """Demo tabs besides the missions: live camera, coordinates validation, spoofing / stress when their data is local."""
+import time
+
 import cv2
 import pytest
 
@@ -15,9 +17,13 @@ def client(tmp_path, monkeypatch):
     from app import extras, jobs, server
 
     monkeypatch.setattr(jobs, "RESULTS_DIR", tmp_path / "results")
+    monkeypatch.setattr(jobs, "UPLOADS_DIR", tmp_path / "uploads")
+    monkeypatch.setattr(extras, "UPLOADS", tmp_path / "uploads" / "stress")
     monkeypatch.setattr(server, "UPLOADS_DIR", tmp_path / "uploads")
     monkeypatch.setattr(extras, "CACHE", tmp_path / "cache")
-    monkeypatch.setattr(server, "manager", jobs.JobManager())
+    manager = jobs.JobManager()
+    monkeypatch.setattr(server, "manager", manager)
+    extras.bind_manager(manager)
     return TestClient(server.app)
 
 
@@ -30,7 +36,7 @@ def test_live_camera_tracks_frames(client, tmp_path, monkeypatch):
     monkeypatch.setattr(extras, "_live_maps", lambda: [{"id": "t", "label": "t", "map": str(tmp_path / "map.png")}])
     s = client.post("/api/live/start", data={"map_id": "t", "method": "track_sift"}).json()
     assert s["map_size"] == [1600, 1200]
-    assert client.get(f"/api/live/{s['id']}/map").status_code == 200
+    assert client.get("/api/live/preview/t").status_code == 200
     fixes = []
     for p in sorted((data / "frames").iterdir()):
         ok, buf = cv2.imencode(".jpg", imread(p))
@@ -48,22 +54,59 @@ def test_coordinates_are_validated(client):
     assert client.post("/api/jobs", data={"lat": "49.8", "lon": "24", "size_km": "abc"}).status_code == 400
 
 
-def test_spoofing_tab(client):
-    info = client.get("/api/spoof/info").json()
-    if not info["available"]:
-        pytest.skip("real flight data/real/visloc_24 is not local")
-    m = info["methods"][0]["id"]
-    r = client.get("/api/spoof/run", params={"method": m, "start": 80, "rate": 3}).json()
-    assert len(r["truth"]) == len(r["gps"]) == info["n_frames"]
-    assert r["stats"]["alarm"] is not None and not r["stats"]["false_alarm"]
-    assert r["stats"]["err_fixed_m"] < 20 < r["stats"]["err_gps_m"]
+def test_spoofing_on_own_flight_with_gps(client, tmp_path, monkeypatch):
+    """A mission on a georeferenced map with a GPS ground truth becomes a spoofing source."""
+    import pandas as pd
+
+    from app import jobs, server
+    from vo.tiles import GeoRef
+
+    imwrite(tmp_path / "map.png", make_world(1600, 1200, seed=4))
+    data = make_flight(tmp_path / "syn", n_frames=16, frame_size=(400, 300), turns=0.4, seed=4,
+                       world_path=tmp_path / "map.png", frame_scale=0.5)
+    geo = GeoRef(17, 74_000 * 256 // 256 * 256, 44_000 * 256 // 256 * 256, 1600, 1200)
+    geo.save(tmp_path / "geo.json")
+    gt = pd.read_csv(data / "gt.csv")
+    gt["name"] = [p.stem for p in sorted((data / "frames").iterdir())][: len(gt)]
+    gt["lon"], gt["lat"] = geo.to_lonlat(gt["x"], gt["y"])
+    gt[["name", "lat", "lon"]].to_csv(tmp_path / "gps.csv", index=False)
+    files = [("frames", (p.name, open(p, "rb"), "image/png")) for p in sorted((data / "frames").iterdir())]
+    files += [("map_file", ("map.png", open(tmp_path / "map.png", "rb"), "image/png")),
+              ("geo_file", ("geo.json", open(tmp_path / "geo.json", "rb"), "application/json")),
+              ("gps_file", ("gps.csv", open(tmp_path / "gps.csv", "rb"), "text/csv"))]
+    job_id = client.post("/api/jobs", data={"method": "baseline", "frame_scale": "0.5"}, files=files).json()["id"]
+    job = server.manager.get(job_id)
+    for _ in range(600):
+        if job.finished:
+            break
+        time.sleep(0.1)
+    assert job.status == "done", job.error
+    assert job.data_kind == "real" and (job.out_dir / "route_map.html").exists()
+    src = [s for s in client.get("/api/spoof/sources").json()["sources"] if s["id"] == f"job:{job_id}"]
+    assert src and src[0]["fixes_pct"] >= 40  # procedural world: the baseline registers part of the frames
+    r = client.get("/api/spoof/run", params={"source": src[0]["id"], "start": 4, "rate": 20, "threshold": 15}).json()
+    assert r["stats"]["alarm"] is not None and r["stats"]["false_alarm"] is None
 
 
-def test_stress_tab(client):
-    info = client.get("/api/stress/info").json()
-    assert {a["name"] for a in info["axes"]} >= {"blur", "clouds", "darkness"}
-    if not info["available"]:
-        pytest.skip("stress area is not local")
-    r = client.get("/api/stress/try", params={"axis": "clouds", "level_idx": 0, "method": "sift_flann"}).json()
-    assert r["image"].startswith("data:image/jpeg") and r["success"]
-    assert client.get("/api/stress/try", params={"axis": "nope"}).status_code == 400
+def test_gps_csv_is_validated(client, tmp_path):
+    bad = tmp_path / "bad.csv"
+    bad.write_text("a,b\n1,2\n", encoding="utf-8")
+    files = [("frames", ("f.jpg", cv2.imencode(".jpg", make_world(64, 64, seed=1))[1].tobytes(), "image/jpeg")),
+             ("gps_file", ("bad.csv", open(bad, "rb"), "text/csv"))]
+    r = client.post("/api/jobs", data={"method": "baseline"}, files=files)
+    assert r.status_code == 400 and "колонки" in r.json()["detail"]
+
+
+def test_stress_own_frame(client, tmp_path):
+    world = make_world(1600, 1200, seed=6)
+    imwrite(tmp_path / "map.png", world)
+    data = make_flight(tmp_path / "syn", n_frames=2, frame_size=(400, 300), seed=6, world_path=tmp_path / "map.png",
+                       frame_scale=0.5)
+    frame = sorted((data / "frames").iterdir())[0]
+    up = client.post("/api/stress/upload", files={"frame": open(frame, "rb"), "map_file": open(tmp_path / "map.png", "rb")},
+                     data={"frame_scale": "0.5"}).json()
+    r = client.get("/api/stress/try", params={"source": up["id"], "axis": "noise", "level_idx": 0}).json()
+    assert r["success"] and r["units"] == "px"
+    assert client.get("/api/stress/try", params={"source": up["id"], "axis": "tilt"}).status_code == 400
+    cv = client.get("/api/stress/curve", params={"source": up["id"], "axis": "noise", "method": "sift_flann"}).json()
+    assert cv["frames"] == 1 and cv["success"][0] == 1.0

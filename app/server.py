@@ -27,6 +27,7 @@ from fastapi.staticfiles import StaticFiles
 from vo.io import IMG_EXTS
 
 from .catalog import DEFAULT_MAP, METHODS, METHODS_BY_ID, presets
+from .extras import bind_manager
 from .extras import router as extras_router
 from .jobs import RESULT_FILES, RESULTS_DIR, UPLOADS_DIR, Job, JobManager
 
@@ -36,6 +37,7 @@ STATIC = Path(__file__).resolve().parent / "static"
 app = FastAPI(title="Drone Mission Replay")
 app.include_router(extras_router)
 manager = JobManager()
+bind_manager(manager)
 
 
 def _safe_name(name: str) -> str:
@@ -51,6 +53,21 @@ async def _save(upload: UploadFile, dest: Path) -> Path:
     return dest
 
 
+def _gps_to_gt(gps_csv: Path, geo_json: Path, out: Path) -> Path:
+    """GPS CSV -> GT in map px of a georeferenced own map."""
+    from vo.tiles import GeoRef
+
+    from .jobs import read_gps_csv
+
+    try:
+        gps, geo = read_gps_csv(gps_csv), GeoRef.load(geo_json)
+    except Exception as e:  # noqa: BLE001 - shown to the user
+        raise HTTPException(400, f"geo.json або GPS: {e}")
+    gps["x"], gps["y"] = geo.to_px(gps["lon"].to_numpy(), gps["lat"].to_numpy())
+    gps[["name", "x", "y", "lon", "lat"]].to_csv(out, index=False, float_format="%.7f")
+    return out
+
+
 def _job(job_id: str) -> Job:
     job = manager.get(job_id)
     if job is None:
@@ -61,8 +78,8 @@ def _job(job_id: str) -> Job:
 @app.get("/api/info")
 def info():
     return {"methods": [m.to_dict() for m in METHODS],
-            "presets": [{"id": p["id"], "label": p["label"], "gt": bool(p["gt"]), "geo": p["geo"]}
-                        for p in presets()],
+            "presets": [{"id": p["id"], "label": p["label"], "gt": bool(p["gt"]), "geo": p["geo"], "kind": p["kind"],
+                         "map": p["map"]} for p in presets()],
             "default_map": DEFAULT_MAP.exists()}
 
 
@@ -83,6 +100,9 @@ async def create_job(
     lat: float | None = Form(None),
     lon: float | None = Form(None),
     size_km: str | None = Form(None),
+    gps_file: UploadFile | None = File(None),
+    geo_file: UploadFile | None = File(None),
+    zoom: int = Form(18),
 ):
     m = METHODS_BY_ID.get(method)
     if m is None:
@@ -92,7 +112,7 @@ async def create_job(
     job_id = manager.new_id()
     up = UPLOADS_DIR / job_id
     overrides = [f"name=app_{m.id}"]
-    video, frames_dir, step, gt_path, area = None, None, 1, None, None
+    video, frames_dir, step, gt_path, area, gps, kind = None, None, 1, None, None, None, "real_nogt"
     max_frames = max_frames or None
 
     if lat is not None and lon is not None:
@@ -105,7 +125,7 @@ async def create_job(
         if not (0.3 <= w_km <= 6 and 0.3 <= h_km <= 6):
             raise HTTPException(400, "розмір ділянки 0.3–6 км по кожній стороні")
         area = {"lat": lat, "lon": lon, "w_km": w_km, "h_km": h_km, "frames": min(max_frames or 60, 150)}
-        map_path, fs = up / "area" / "map.jpg", frame_scale or 0.5
+        map_path, fs, kind = up / "area" / "map.jpg", frame_scale or 0.5, "synthetic"
         title = f"Координати {lat:.4f}, {lon:.4f}"
     elif preset:
         p = next((p for p in presets() if p["id"] == preset), None)
@@ -115,16 +135,41 @@ async def create_job(
         if p["gt"]:
             gt_path = Path(p["gt"])
             overrides.append(f"data.gt={gt_path.as_posix()}")
-        fs = frame_scale or p["frame_scale"]
+        fs, kind = frame_scale or p["frame_scale"], p["kind"]
         title = p["label"]
     else:
         files = [f for f in (frames or []) if f.filename]
         if not files:
             raise HTTPException(400, "завантажте фото кадрів або одне відео")
-        if map_file is not None and map_file.filename:
+        has_gps = gps_file is not None and bool(gps_file.filename)
+        has_map = map_file is not None and bool(map_file.filename)
+        if has_gps:
+            from .jobs import read_gps_csv
+
+            gps_csv = await _save(gps_file, up / "gps.csv")
+            try:
+                read_gps_csv(gps_csv)
+            except Exception as e:  # noqa: BLE001 - shown to the user
+                raise HTTPException(400, str(e))
+            kind = "real"
+            if not has_map:  # the map comes from satellite tiles around the GPS track
+                if not 15 <= zoom <= 19:
+                    raise HTTPException(400, "zoom мапи 15–19")
+                gps = {"csv": gps_csv, "zoom": zoom}
+        if gps is not None:
+            map_path = up / "gpsmap" / "map.jpg"
+        elif has_map:
             if Path(map_file.filename).suffix.lower() not in IMG_EXTS:
                 raise HTTPException(400, "мапа має бути зображенням")
             map_path = await _save(map_file, up / ("map" + Path(map_file.filename).suffix.lower()))
+            if geo_file is not None and geo_file.filename:
+                await _save(geo_file, up / "geo.json")
+            if has_gps:
+                if not (up / "geo.json").exists():
+                    raise HTTPException(400, "своя мапа + GPS: додайте geo.json мапи (або не завантажуйте мапу — "
+                                             "вона збудується з тайлів за GPS)")
+                gt_path = _gps_to_gt(up / "gps.csv", up / "geo.json", up / "gt.csv")
+                overrides.append(f"data.gt={gt_path.as_posix()}")
         elif DEFAULT_MAP.exists():
             map_path = DEFAULT_MAP
         else:
@@ -145,12 +190,13 @@ async def create_job(
             title = f"{len(files)} фото"
         fs = frame_scale or 0.5
     overrides.append(f"localize.frame_scale={fs}")
-    if area is None:
+    if area is None and gps is None:
         overrides.append(f"map.path={Path(map_path).as_posix()}")
 
     job = Job(id=job_id, title=title, method=m.label, map_path=Path(map_path), frames_dir=frames_dir,
               out_dir=RESULTS_DIR / job_id, overrides=overrides, config=m.config, video_path=video,
-              video_every=max(1, every), max_frames=max_frames, step=step, gt_path=gt_path, area=area)
+              video_every=max(1, every), max_frames=max_frames, step=step, gt_path=gt_path, area=area, gps=gps,
+              data_kind=kind)
     manager.submit(job)
     return {"id": job.id}
 
@@ -182,6 +228,20 @@ def job_map(job_id: str):
     if not job.map_path.exists():
         raise HTTPException(404, "map is not ready yet")
     return FileResponse(manager.map_preview(job), media_type="image/jpeg")
+
+
+@app.get("/api/jobs/{job_id}/basemap/{kind}")
+def job_basemap(job_id: str, kind: str):
+    from .extras import _geo_for, basemap
+
+    job = _job(job_id)
+    geo = _geo_for(job.map_path)
+    if geo is None:
+        raise HTTPException(404, "map has no georeference")
+    try:
+        return FileResponse(basemap(geo, kind), media_type="image/jpeg")
+    except OSError as e:
+        raise HTTPException(503, f"немає доступу до тайлів Esri: {e}")
 
 
 @app.get("/api/jobs/{job_id}/frame/{k}")

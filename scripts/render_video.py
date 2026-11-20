@@ -51,12 +51,14 @@ def keyframe_index(names: list[str]) -> np.ndarray:
 
 
 def interpolate_poses(key_t: np.ndarray, key_xy: np.ndarray, key_c: np.ndarray, ok: np.ndarray, n_frames: int):
-    """Per video frame centre (n,2) and corners (n,4,2); NaN before the first / after the last valid keyframe."""
+    """Per video frame centre (n,2) and corners (n,4,2); NaN before the first valid keyframe and more than one
+    keyframe step after the last one (the last pose is held over the few tail frames after the final keyframe)."""
     t = np.arange(n_frames)
     kt, kxy, kc = key_t[ok], key_xy[ok], key_c[ok].reshape(-1, 8)
     xy = np.full((n_frames, 2), np.nan)
     cs = np.full((n_frames, 8), np.nan)
-    inside = (t >= kt[0]) & (t <= kt[-1])
+    step = int(np.median(np.diff(key_t))) if len(key_t) > 1 else 1
+    inside = (t >= kt[0]) & (t <= kt[-1] + step)  # np.interp holds the end value beyond kt[-1]
     for d in range(2):
         xy[inside, d] = np.interp(t[inside], kt, kxy[:, d])
     for d in range(8):

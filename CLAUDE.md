@@ -123,6 +123,8 @@ Esri World Imagery на zoom 17 + та сама ділянка на zoom 19 дл
 
 - **Бейзлайн локалізації на мапі:** SIFT (кадр зменшено до масштабу мапи) + FLANN + ratio 0.75 + MAGSAC++ гомографія
   по всій мапі, без трекінгу і згладжування.
+- **Фінальний метод (обрано 2026-11-20):** `configs/map/final.yaml` — SIFT + LightGlue, трекінг у ROI з деротацією,
+  ре-ініціалізація SIFT + FLANN по всій мапі. Обґрунтування — `docs/presentation/notes.md` (розділ «Фінальний метод»).
 - **Бейзлайн VO між кадрами:** `configs/baseline.yaml` — SIFT + FLANN + ratio 0.75 + RANSAC, ланцюжок.
 - **Головні кандидати:** SuperPoint / ALIKED / DISK + LightGlue, XFeat, Efficient LoFTR, SuperGlue — разом із
   деротацією за прогнозом курсу, пошуком у ROI мапи, злиттям з VO і згладжуванням.

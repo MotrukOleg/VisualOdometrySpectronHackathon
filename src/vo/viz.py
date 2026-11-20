@@ -40,6 +40,11 @@ def time_colors(n: int) -> np.ndarray:
     return cv2.applyColorMap(ramp, cv2.COLORMAP_TURBO)[:, 0][:n].astype(int)
 
 
+def _ordinal(n: int) -> str:
+    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
 def render_route(map_bgr: np.ndarray, traj: pd.DataFrame, out_path: str | Path | None = None,
                  zoom_path: str | Path | None = None, cfg: dict | None = None, title: str = "",
                  gt: np.ndarray | None = None) -> np.ndarray:
@@ -169,7 +174,7 @@ def _legend(img, n, u, st, has_gt, title, route_pts=None, fp_every=1):
         (f"Route: frames 0 .. {n - 1}  (colour = time)", None),
         (f"registered: {int((st == 'map').sum())}   interpolated: {int((st == 'interp').sum())}   "
          f"lost: {int((st == 'lost').sum())}", None),
-        ("outline = frame footprint (thick side = top of photo)" + (f", every {fp_every}th frame" if fp_every > 1 else ""), None),
+        ("outline = frame footprint (thick side = top of photo)" + (f", every {_ordinal(fp_every)} frame" if fp_every > 1 else ""), None),
     ]
     if has_gt:
         lines.append(("white line = ground truth", None))

@@ -212,6 +212,11 @@ class HFKeypointMatcher(_TorchImageMatcher):
         self.threshold = threshold
 
     def match_images(self, img0, img1):
+        # Note (verified on a synthetic shift test, transformers 5.23): Efficient LoFTR from `transformers` returns
+        # coarse matches only (image-1 points stay on the 8-px coarse grid, no sub-pixel refinement) and the processor
+        # resizes both images to a fixed 640x480. Padding to a common size instead was tried and made the tracking
+        # results worse, so the default processor path is kept and Efficient LoFTR is reported as an implementation
+        # limitation, not a method result.
         a, s0 = self._prep(img0)
         b, s1 = self._prep(img1)
         ra, rb = cv2.cvtColor(a, cv2.COLOR_BGR2RGB), cv2.cvtColor(b, cv2.COLOR_BGR2RGB)
@@ -224,6 +229,98 @@ class HFKeypointMatcher(_TorchImageMatcher):
         p0 = r["keypoints0"].float().cpu().numpy() / s0
         p1 = r["keypoints1"].float().cpu().numpy() / s1
         c = r["matching_scores"].float().cpu().numpy()
+        return p0, p1, c
+
+
+def _stub_unpickler(prefix: str):
+    """pickle module for torch.load that replaces classes of `prefix` (e.g. Lightning callbacks stored in a training
+    checkpoint) with empty stubs, so the state_dict can be read without installing that package."""
+    import pickle
+    import types
+
+    class _Stub:
+        def __new__(cls, *a, **k):
+            return object.__new__(cls)
+
+        def __init__(self, *a, **k):
+            pass
+
+        def __setstate__(self, state):
+            pass
+
+    class Unpickler(pickle.Unpickler):
+        def find_class(self, module, name):
+            if module.split(".")[0] == prefix:
+                return type(name, (_Stub,), {})
+            return super().find_class(module, name)
+
+    return types.SimpleNamespace(Unpickler=Unpickler, load=pickle.load, __name__="pickle")
+
+
+class EfficientLoFTROfficialMatcher(_TorchImageMatcher):
+    """Efficient LoFTR from the authors' repo (coarse + sub-pixel fine matching), Apache-2.0.
+
+    git clone https://github.com/zju3dv/EfficientLoFTR third_party/EfficientLoFTR
+    weights: third_party/EfficientLoFTR/weights/eloftr_outdoor.ckpt (Google Drive link in the repo README)
+    """
+
+    def __init__(self, device="cpu", resize_long_side=None, thr: float = 0.2, preprocess=None):
+        super().__init__(device, resize_long_side, preprocess)
+        from copy import deepcopy
+
+        repo = ROOT / "third_party" / "EfficientLoFTR"
+        ckpt = repo / "weights" / "eloftr_outdoor.ckpt"
+        if not ckpt.exists():
+            raise ImportError(f"Efficient LoFTR repo / weights not found at {ckpt}; see the class docstring")
+        sys.path.insert(0, str(repo))
+        try:  # the repo imports kornia.utils.grid, which kornia >= 0.8 folded into kornia.utils
+            import kornia.utils.grid  # noqa: F401
+        except ImportError:
+            import types
+
+            import kornia.utils
+
+            shim = types.ModuleType("kornia.utils.grid")
+            shim.create_meshgrid = kornia.utils.create_meshgrid
+            sys.modules["kornia.utils.grid"] = shim
+        try:  # only `rank_zero_only` (training-time logging) is used; avoid installing Lightning for inference
+            import pytorch_lightning  # noqa: F401
+        except ImportError:
+            import types
+
+            def rank_zero_only(fn):
+                return fn
+
+            rank_zero_only.rank = 0
+            pl, plu = types.ModuleType("pytorch_lightning"), types.ModuleType("pytorch_lightning.utilities")
+            plu.rank_zero_only = rank_zero_only
+            pl.utilities = plu
+            sys.modules.update({"pytorch_lightning": pl, "pytorch_lightning.utilities": plu})
+        from src.loftr import LoFTR, full_default_cfg, reparameter  # type: ignore
+
+        cfg = deepcopy(full_default_cfg)
+        cfg["match_coarse"]["thr"] = thr
+        model = LoFTR(config=cfg)
+        state = self.torch.load(str(ckpt), map_location="cpu", weights_only=False,
+                                pickle_module=_stub_unpickler("pytorch_lightning"))["state_dict"]
+        model.load_state_dict(state)
+        self.model = reparameter(model).eval().to(device)
+
+    def _tensor(self, img):
+        g = to_gray(img)
+        h, w = g.shape
+        g = g[: h - h % 32, : w - w % 32]  # Efficient LoFTR needs sizes divisible by 32
+        return self.torch.from_numpy(g).float().div(255.0)[None, None].to(self.device)
+
+    def match_images(self, img0, img1):
+        a, s0 = self._prep(img0)
+        b, s1 = self._prep(img1)
+        batch = {"image0": self._tensor(a), "image1": self._tensor(b)}
+        with self.torch.inference_mode():
+            self.model(batch)
+        p0 = batch["mkpts0_f"].float().cpu().numpy() / s0
+        p1 = batch["mkpts1_f"].float().cpu().numpy() / s1
+        c = batch["mconf"].float().cpu().numpy()
         return p0, p1, c
 
 
@@ -250,6 +347,11 @@ class RoMaMatcher(_TorchImageMatcher):
         B = Image.fromarray(cv2.cvtColor(b, cv2.COLOR_BGR2RGB))
         with self.torch.inference_mode():
             warp, cert = self.model.match(A, B)
+            if not bool((cert.float().sum() > 1e-12).item()):
+                # zero certainty everywhere (e.g. forest vs satellite): torch.multinomial in sample() would hit a
+                # CUDA device-side assert and poison the whole CUDA context -> report "no matches" instead
+                e = np.zeros((0, 2), np.float32)
+                return e, e.copy(), np.zeros(0, np.float32)
             m, c = self.model.sample(warp, cert, num=self.num)
             ka, kb = self.model.to_pixel_coordinates(m, a.shape[0], a.shape[1], b.shape[0], b.shape[1])
         return ka.float().cpu().numpy() / s0, kb.float().cpu().numpy() / s1, c.float().cpu().numpy()

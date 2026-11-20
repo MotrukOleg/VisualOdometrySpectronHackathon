@@ -53,7 +53,8 @@ def main():
             vset = [s for s in (var or "").split(",") if s]
             for ds in a.datasets:
                 d = datasets[ds]
-                over = [f"data.frames={d['frames']}", f"data.gt={d['gt']}" if d["gt"] else "data.gt=null"]
+                over = [f"data.frames={d['frames']}", f"data.gt={d['gt']}" if d["gt"] else "data.gt=null",
+                        f"data.step={d.get('step', 1)}"] + ([f"map.path={d['map']}"] if d.get("map") else [])
                 cfg = load_config(cpath, over + a.set + vset)
                 label = cfg["name"] + ("" if not vset else "[" + ",".join(vset) + "]")
                 out = BENCH / a.tag / label.replace("/", "_").replace("=", "-").replace(",", "+") / ds
@@ -67,9 +68,15 @@ def main():
                     row.update({k: v for k, v in m.items() if not isinstance(v, (list, dict))})
                     traj = read_trajectory(out / "trajectory.csv")
                     src = FrameSource(d["frames"])
-                    f2f = frame_to_frame(d["frames"], ROOT / "experiments" / "cache" / f"f2f_{ds}.npz")
-                    row.update(consistency(traj, f2f, src.size(0)))
-                    ref = BENCH / "reference" / "map_baseline_sift" / ds / "trajectory.csv"
+                    base_ds = ds[:-2] if ds.endswith("s2") else ds  # subsampled sets reuse the full-set caches
+                    if d.get("step", 1) == 1:
+                        f2f = frame_to_frame(d["frames"], ROOT / "experiments" / "cache" / f"f2f_{ds}.npz")
+                        row.update(consistency(traj, f2f, src.size(0)))
+                    else:  # consecutive keyframes of the subsampled run: f2f of step-2 pairs
+                        f2f = frame_to_frame(d["frames"] + f"#step{d['step']}",
+                                             ROOT / "experiments" / "cache" / f"f2f_{ds}.npz", step=d["step"])
+                        row.update(consistency(traj, f2f, src.size(0)))
+                    ref = BENCH / "reference" / "map_baseline_sift" / base_ds / "trajectory.csv"
                     if ref.exists() and a.tag != "reference":
                         row.update(agreement(traj, read_trajectory(ref)))
                     row["status"] = "ok"

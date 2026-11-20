@@ -5,3 +5,20 @@ syn_easy:   {frames: data/synthetic_map/frames,     gt: data/synthetic_map/gt.cs
 syn_hard:   {frames: data/synthetic_hard/frames,    gt: data/synthetic_hard/gt.csv,  frame_scale: 0.5}
 video0061:  {frames: data/video/IMG_0061_every5,    gt: null,                        frame_scale: 0.5}
 video0062:  {frames: data/video/IMG_0062_every5,    gt: null,                        frame_scale: 0.5}
+# every 2nd keyframe of the videos (= every 10th video frame): used for the slower learned methods
+video0061s2: {frames: data/video/IMG_0061_every5,   gt: null,                        frame_scale: 0.5, step: 2}
+video0062s2: {frames: data/video/IMG_0062_every5,   gt: null,                        frame_scale: 0.5, step: 2}
+# third own video (1280x720, strong roll + perspective, wide footprint)
+video214816:   {frames: data/video/VID_214816_every5, gt: null,                        frame_scale: 0.5}
+video214816s2: {frames: data/video/VID_214816_every5, gt: null,                        frame_scale: 0.5, step: 2}
+# "any area" benchmark (scripts/make_area.py): Esri map at zoom 17 + frames from zoom 19 (scale 0.25), exact GT
+area_lviv:      {frames: data/areas/lviv_old_town/flight/frames,  gt: data/areas/lviv_old_town/flight/gt.csv,  map: data/areas/lviv_old_town/map.jpg,  frame_scale: 0.5}
+area_kyiv:      {frames: data/areas/kyiv_dnipro/flight/frames,    gt: data/areas/kyiv_dnipro/flight/gt.csv,    map: data/areas/kyiv_dnipro/map.jpg,    frame_scale: 0.5}
+area_carpathians: {frames: data/areas/carpathians/flight/frames,  gt: data/areas/carpathians/flight/gt.csv,    map: data/areas/carpathians/map.jpg,    frame_scale: 0.5}
+area_poltava:   {frames: data/areas/poltava_fields/flight/frames, gt: data/areas/poltava_fields/flight/gt.csv, map: data/areas/poltava_fields/map.jpg, frame_scale: 0.5}
+# hard terrains, 50 frames each (frames from zoom 18, upsampled x2)
+area_oleshky:   {frames: data/areas/oleshky_sands/flight/frames,   gt: data/areas/oleshky_sands/flight/gt.csv,   map: data/areas/oleshky_sands/map.jpg,   frame_scale: 0.5}
+area_gorgany:   {frames: data/areas/gorgany_forest/flight/frames,  gt: data/areas/gorgany_forest/flight/gt.csv,  map: data/areas/gorgany_forest/map.jpg,  frame_scale: 0.5}
+area_kyiv_sea:  {frames: data/areas/kyiv_sea/flight/frames,        gt: data/areas/kyiv_sea/flight/gt.csv,        map: data/areas/kyiv_sea/map.jpg,        frame_scale: 0.5}
+area_askania:   {frames: data/areas/askania_steppe/flight/frames,  gt: data/areas/askania_steppe/flight/gt.csv,  map: data/areas/askania_steppe/map.jpg,  frame_scale: 0.5}
+area_tylihul:   {frames: data/areas/tylihul_estuary/flight/frames, gt: data/areas/tylihul_estuary/flight/gt.csv, map: data/areas/tylihul_estuary/map.jpg, frame_scale: 0.5}

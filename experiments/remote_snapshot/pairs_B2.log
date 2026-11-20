@@ -1,0 +1,3 @@
+efficient_loftr_official_track           hard  n=210 ok=0.690 @1px=0.052 @3px=0.343 @10px=0.567 med=6.26 inl=275 ms=1571
+saved experiments/pairs/finetune_pos_crops/results_B2.csv
+loftr_track                              plain n=210 ok=1.000 @1px=0.900 @3px=1.000 @10px=1.000 med=0.26 inl=1108 ms=2880

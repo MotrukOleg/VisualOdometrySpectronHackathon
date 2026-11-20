@@ -1,0 +1,193 @@
+crops        f2f sift : 49/49 pairs
+crops        f2f splg : 49/49 pairs
+crops        f2f loftr: 49/49 pairs
+syn_easy     f2f sift : 75/79 pairs
+syn_easy     f2f splg : 70/79 pairs
+syn_easy     f2f loftr: 68/79 pairs
+syn_hard     f2f sift : 79/79 pairs
+syn_hard     f2f splg : 79/79 pairs
+syn_hard     f2f loftr: 78/79 pairs
+video0061    f2f sift : 102/102 pairs
+video0061    f2f splg : 102/102 pairs
+video0061    f2f loftr: 102/102 pairs
+video0062    f2f sift : 107/107 pairs
+video0062    f2f splg : 107/107 pairs
+video0062    f2f loftr: 107/107 pairs
+video214816  f2f sift : 199/199 pairs
+video214816  f2f splg : 199/199 pairs
+video214816  f2f loftr: 199/199 pairs
+
+== crops
+                              label  reg  cons_sift  cons_splg  cons_loftr  cons_all  cons_other
+                         roma_track 1.00      0.047      0.208       0.081     0.112       0.112
+            aliked_n16rot_mnn_track 1.00      0.070      0.192       0.112     0.125       0.125
+                  sift_flann_global 1.00      0.059      0.191       0.104     0.118       0.148
+                    sift_mnn_global 0.90      0.072      0.175       0.120     0.123       0.148
+              rootsift_flann_global 1.00      0.056      0.190       0.107     0.118       0.149
+                  map_baseline_sift 1.00      0.054      0.194       0.103     0.117       0.149
+                     akaze_bf_track 1.00      0.110      0.218       0.178     0.169       0.169
+                   sift_flann_track 1.00      0.095      0.191       0.157     0.148       0.174
+                  sift_adalam_track 1.00      0.069      0.242       0.134     0.148       0.188
+               disk_lightglue_track 1.00      0.143      0.271       0.241     0.218       0.218
+             aliked_lightglue_track 1.00      0.180      0.258       0.221     0.220       0.220
+                dedode_v2_mnn_track 1.00      0.152      0.317       0.236     0.235       0.235
+                        loftr_track 1.00      0.217      0.295       0.298     0.270       0.256
+         superpoint_superglue_track 1.00      0.265      0.268       0.275     0.269       0.270
+                    akaze_bf_global 0.94      0.257      0.338       0.285     0.293       0.293
+superpoint_superglue_official_track 1.00      0.280      0.332       0.316     0.310       0.298
+                       orb_bf_track 1.00      0.277      0.412       0.336     0.342       0.342
+                    brisk_bf_global 0.98      0.372      0.333       0.411     0.372       0.372
+     efficient_loftr_official_track 1.00      0.321      0.433       0.327     0.360       0.377
+               sift_lightglue_track 1.00      0.291      0.410       0.346     0.349       0.378
+         superpoint_lightglue_track 1.00      0.404      0.395       0.405     0.401       0.405
+                      orb_bf_global 0.82      0.748      0.845       0.798     0.797       0.797
+                   xfeat_star_track 1.00      1.031      1.136       1.101     1.089       1.089
+                        xfeat_track 1.00      1.185      1.092       1.109     1.129       1.129
+                    tiny_roma_track 1.00      3.302      3.362       3.200     3.288       3.288
+              efficient_loftr_track 1.00     11.880     11.928      11.832    11.880      11.904
+
+== syn_easy
+                              label   reg  cons_sift  cons_splg  cons_loftr  cons_all  cons_other  gt_err
+            aliked_n16rot_mnn_track 1.000      0.069      0.289       0.143     0.167       0.167   0.354
+                         roma_track 1.000      0.080      0.283       0.161     0.174       0.174   0.046
+                    sift_mnn_global 1.000      0.055      0.253       0.129     0.146       0.191   0.355
+              rootsift_flann_global 1.000      0.048      0.255       0.128     0.144       0.192   0.355
+                     akaze_bf_track 1.000      0.104      0.283       0.193     0.193       0.193   0.035
+                  map_baseline_sift 1.000      0.051      0.258       0.132     0.147       0.195   0.355
+                  sift_flann_global 1.000      0.049      0.256       0.135     0.147       0.196   0.354
+                  sift_adalam_track 1.000      0.040      0.276       0.138     0.151       0.207   0.031
+               disk_lightglue_track 1.000      0.122      0.279       0.223     0.208       0.208   0.070
+                   sift_flann_track 1.000      0.053      0.285       0.135     0.157       0.210   0.033
+                dedode_v2_mnn_track 1.000      0.208      0.334       0.258     0.267       0.267   0.152
+               sift_lightglue_track 1.000      0.136      0.331       0.221     0.229       0.276   0.059
+             aliked_lightglue_track 1.000      0.207      0.363       0.269     0.279       0.279   0.224
+                        loftr_track 1.000      0.194      0.370       0.246     0.270       0.282   0.142
+     efficient_loftr_official_track 1.000      0.224      0.403       0.283     0.304       0.314   0.185
+superpoint_superglue_official_track 1.000      0.334      0.416       0.350     0.367       0.342   0.130
+                    akaze_bf_global 0.912      0.301      0.431       0.366     0.366       0.366   0.190
+         superpoint_superglue_track 1.000      0.341      0.439       0.393     0.391       0.367   0.233
+                       orb_bf_track 1.000      0.317      0.439       0.363     0.373       0.373   0.156
+         superpoint_lightglue_track 1.000      0.420      0.513       0.407     0.447       0.414   0.159
+                    brisk_bf_global 1.000      0.420      0.506       0.397     0.441       0.441   0.429
+                      orb_bf_global 0.850      0.811      0.856       0.830     0.832       0.832   0.789
+                        xfeat_track 1.000      1.345      1.357       1.260     1.321       1.321   0.400
+                   xfeat_star_track 1.000      1.462      1.257       1.306     1.342       1.342   1.343
+                    tiny_roma_track 1.000      3.565      3.485       3.194     3.415       3.415   0.985
+              efficient_loftr_track 1.000     20.042     24.519      26.327    23.629      22.281   6.187
+Spearman vs GT error: cons_sift=0.52, cons_splg=0.46, cons_loftr=0.46, cons_all=0.45, cons_other=0.49
+
+== syn_hard
+                              label   reg  cons_sift  cons_splg  cons_loftr  cons_all  cons_other  gt_err
+            aliked_n16rot_mnn_track 0.925      0.126      0.322       0.174     0.208       0.208   0.764
+                     akaze_bf_track 0.925      0.119      0.317       0.197     0.211       0.211   0.677
+                  map_baseline_sift 0.925      0.096      0.302       0.162     0.187       0.232   0.733
+                    sift_mnn_global 0.925      0.084      0.289       0.176     0.183       0.232   0.723
+              rootsift_flann_global 0.925      0.103      0.316       0.162     0.193       0.239   0.710
+         superpoint_lightglue_track 0.925      0.209      0.296       0.279     0.261       0.244   0.622
+                  sift_flann_global 0.925      0.101      0.311       0.178     0.197       0.244   0.732
+superpoint_superglue_official_track 0.925      0.229      0.321       0.260     0.270       0.245   0.643
+                   sift_flann_track 0.925      0.124      0.312       0.202     0.213       0.257   0.662
+                  sift_adalam_track 0.925      0.123      0.331       0.187     0.214       0.259   0.675
+               disk_lightglue_track 0.925      0.180      0.350       0.255     0.262       0.262   0.663
+                    brisk_bf_global 0.888      0.217      0.390       0.298     0.302       0.302   0.326
+     efficient_loftr_official_track 0.925      0.220      0.390       0.271     0.294       0.305   0.665
+                         roma_track 0.925      0.258      0.347       0.313     0.306       0.306   0.695
+                      orb_bf_global 0.925      0.249      0.357       0.332     0.312       0.312   0.540
+         superpoint_superglue_track 0.925      0.265      0.455       0.360     0.360       0.313   0.857
+                        loftr_track 0.925      0.288      0.398       0.323     0.336       0.343   0.700
+             aliked_lightglue_track 0.925      0.296      0.409       0.333     0.346       0.346   0.824
+                    akaze_bf_global 0.862      0.252      0.436       0.365     0.351       0.351   0.314
+               sift_lightglue_track 0.925      0.227      0.418       0.294     0.313       0.356   0.681
+                       orb_bf_track 0.938      0.304      0.446       0.365     0.372       0.372   0.664
+                        xfeat_track 0.938      0.436      0.464       0.485     0.462       0.462   0.744
+                   xfeat_star_track 0.925      0.451      0.594       0.456     0.500       0.500   1.530
+                dedode_v2_mnn_track 0.925      0.482      0.557       0.492     0.510       0.510   0.778
+                    tiny_roma_track 0.962      1.049      1.098       1.183     1.110       1.110   0.881
+              efficient_loftr_track 0.938     15.854     15.763      17.155    16.257      15.809   1.038
+Spearman vs GT error: cons_sift=0.37, cons_splg=0.41, cons_loftr=0.27, cons_all=0.33, cons_other=0.33
+
+== video0061
+                              label   reg  cons_sift  cons_splg  cons_loftr  cons_all  cons_other
+                    akaze_bf_global 1.000      0.030      0.090       0.068     0.062       0.062
+                    sift_mnn_global 1.000      0.025      0.088       0.059     0.057       0.073
+                  sift_flann_global 1.000      0.029      0.089       0.059     0.059       0.074
+                  map_baseline_sift 1.000      0.029      0.090       0.060     0.060       0.075
+              rootsift_flann_global 1.000      0.028      0.094       0.061     0.061       0.077
+                     akaze_bf_track 1.000      0.053      0.104       0.081     0.079       0.079
+                  sift_adalam_track 1.000      0.046      0.093       0.067     0.069       0.080
+                   sift_flann_track 1.000      0.053      0.092       0.073     0.072       0.082
+                      orb_bf_global 1.000      0.060      0.110       0.087     0.086       0.086
+            aliked_n16rot_mnn_track 1.000      0.073      0.091       0.092     0.086       0.086
+               disk_lightglue_track 1.000      0.064      0.107       0.086     0.086       0.086
+                    brisk_bf_global 1.000      0.063      0.103       0.094     0.087       0.087
+             aliked_lightglue_track 1.000      0.077      0.104       0.092     0.091       0.091
+         superpoint_lightglue_track 1.000      0.100      0.130       0.108     0.113       0.104
+               sift_lightglue_track 1.000      0.118      0.148       0.129     0.132       0.138
+                   xfeat_star_track 1.000      0.193      0.218       0.202     0.204       0.204
+                        xfeat_track 1.000      0.228      0.232       0.262     0.241       0.241
+                       orb_bf_track 1.000      0.265      0.259       0.277     0.267       0.267
+     efficient_loftr_official_track 1.000      0.254      0.286       0.263     0.268       0.270
+superpoint_superglue_official_track 1.000      0.321      0.311       0.339     0.324       0.330
+                dedode_v2_mnn_track 1.000      0.355      0.340       0.336     0.344       0.344
+                        loftr_track 1.000      0.398      0.417       0.383     0.399       0.408
+         superpoint_superglue_track 1.000      0.467      0.494       0.472     0.478       0.469
+                    tiny_roma_track 1.000      0.511      0.517       0.512     0.513       0.513
+              efficient_loftr_track 0.961     32.481     32.572      32.466    32.506      32.527
+
+== video0062
+                              label   reg  cons_sift  cons_splg  cons_loftr  cons_all  cons_other
+                    akaze_bf_global 1.000      0.056      0.102       0.106     0.088       0.088
+                    sift_mnn_global 1.000      0.061      0.113       0.104     0.093       0.109
+                  map_baseline_sift 1.000      0.066      0.117       0.113     0.099       0.115
+                     akaze_bf_track 1.000      0.102      0.133       0.120     0.118       0.118
+                  sift_flann_global 1.000      0.076      0.127       0.118     0.107       0.123
+             aliked_lightglue_track 1.000      0.096      0.147       0.126     0.123       0.123
+                    brisk_bf_global 1.000      0.105      0.131       0.137     0.124       0.124
+              rootsift_flann_global 1.000      0.083      0.140       0.122     0.115       0.131
+         superpoint_lightglue_track 1.000      0.120      0.167       0.144     0.143       0.132
+            aliked_n16rot_mnn_track 1.000      0.116      0.154       0.149     0.139       0.139
+               disk_lightglue_track 1.000      0.116      0.156       0.153     0.142       0.142
+                      orb_bf_global 1.000      0.116      0.154       0.158     0.143       0.143
+                   sift_flann_track 1.000      0.107      0.155       0.147     0.137       0.151
+                  sift_adalam_track 1.000      0.106      0.157       0.154     0.139       0.156
+                   xfeat_star_track 1.000      0.146      0.173       0.168     0.163       0.163
+               sift_lightglue_track 1.000      0.180      0.192       0.196     0.189       0.194
+                        xfeat_track 1.000      0.192      0.222       0.248     0.221       0.221
+                       orb_bf_track 1.000      0.289      0.313       0.297     0.300       0.300
+                dedode_v2_mnn_track 1.000      0.338      0.355       0.334     0.342       0.342
+     efficient_loftr_official_track 1.000      0.357      0.358       0.355     0.357       0.357
+superpoint_superglue_official_track 1.000      0.398      0.397       0.396     0.397       0.397
+         superpoint_superglue_track 1.000      0.437      0.456       0.464     0.452       0.451
+                        loftr_track 1.000      0.459      0.487       0.463     0.470       0.473
+                    tiny_roma_track 1.000      0.598      0.629       0.641     0.623       0.623
+                         roma_track 1.000      0.635      0.634       0.636     0.635       0.635
+              efficient_loftr_track 0.944     18.529     18.506      18.533    18.523      18.518
+
+== video214816
+                              label  reg  cons_sift  cons_splg  cons_loftr  cons_all  cons_other
+                      orb_bf_global 1.00      0.171      0.294       0.230     0.232       0.232
+                     akaze_bf_track 1.00      0.191      0.314       0.283     0.263       0.263
+              rootsift_flann_global 1.00      0.161      0.283       0.246     0.230       0.264
+                    akaze_bf_global 1.00      0.193      0.317       0.293     0.267       0.267
+                  map_baseline_sift 1.00      0.166      0.297       0.246     0.236       0.271
+                  sift_flann_global 1.00      0.158      0.288       0.261     0.236       0.275
+                    brisk_bf_global 1.00      0.201      0.353       0.295     0.283       0.283
+               disk_lightglue_track 1.00      0.218      0.366       0.284     0.289       0.289
+                   sift_flann_track 1.00      0.187      0.313       0.275     0.258       0.294
+                  sift_adalam_track 1.00      0.194      0.333       0.258     0.262       0.295
+            aliked_n16rot_mnn_track 1.00      0.237      0.358       0.307     0.300       0.300
+                    sift_mnn_global 1.00      0.178      0.320       0.282     0.260       0.301
+                   xfeat_star_track 1.00      0.232      0.350       0.328     0.304       0.304
+               sift_lightglue_track 1.00      0.203      0.365       0.278     0.282       0.322
+                       orb_bf_track 1.00      0.266      0.367       0.346     0.326       0.326
+             aliked_lightglue_track 1.00      0.262      0.402       0.347     0.337       0.337
+         superpoint_lightglue_track 1.00      0.294      0.439       0.400     0.378       0.347
+                        xfeat_track 1.00      0.306      0.394       0.370     0.357       0.357
+     efficient_loftr_official_track 1.00      0.544      0.617       0.605     0.588       0.580
+superpoint_superglue_official_track 1.00      0.633      0.701       0.686     0.674       0.660
+                        loftr_track 1.00      0.662      0.727       0.692     0.694       0.694
+         superpoint_superglue_track 1.00      0.772      0.808       0.801     0.794       0.786
+                    tiny_roma_track 1.00      0.854      0.871       0.869     0.865       0.865
+              efficient_loftr_track 0.94     40.485     40.756      40.594    40.612      40.621
+
+saved E:\OLeg\Hackathon\experiments\cross_consistency.csv

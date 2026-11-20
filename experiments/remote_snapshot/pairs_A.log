@@ -1,0 +1,16 @@
+brisk_bf_global                          plain n=420 ok=0.860 @1px=0.586 @3px=0.757 @10px=0.829 med=0.67 inl=330 ms=135
+brisk_bf_global                          geo   n=420 ok=0.833 @1px=0.383 @3px=0.660 @10px=0.786 med=1.51 inl=206 ms=38
+brisk_bf_global                          hard  n=420 ok=0.183 @1px=0.000 @3px=0.060 @10px=0.119 med=inf inl=12 ms=25
+rootsift_flann_global                    plain n=420 ok=0.971 @1px=0.914 @3px=0.964 @10px=0.969 med=0.08 inl=594 ms=155
+rootsift_flann_global                    geo   n=420 ok=0.948 @1px=0.843 @3px=0.907 @10px=0.940 med=0.19 inl=385 ms=130
+rootsift_flann_global                    hard  n=420 ok=0.431 @1px=0.033 @3px=0.212 @10px=0.352 med=inf inl=28 ms=98
+sift_mnn_global                          plain n=420 ok=0.969 @1px=0.890 @3px=0.955 @10px=0.964 med=0.11 inl=605 ms=111
+sift_mnn_global                          geo   n=420 ok=0.940 @1px=0.807 @3px=0.898 @10px=0.931 med=0.26 inl=396 ms=99
+sift_mnn_global                          hard  n=420 ok=0.395 @1px=0.043 @3px=0.224 @10px=0.338 med=inf inl=36 ms=71
+akaze_bf_track                           plain n=420 ok=0.810 @1px=0.652 @3px=0.733 @10px=0.779 med=0.34 inl=175 ms=44
+akaze_bf_track                           geo   n=420 ok=0.740 @1px=0.374 @3px=0.557 @10px=0.681 med=1.99 inl=99 ms=44
+akaze_bf_track                           hard  n=420 ok=0.219 @1px=0.002 @3px=0.069 @10px=0.148 med=inf inl=11 ms=43
+aliked_n16rot_mnn_track                  plain n=420 ok=0.971 @1px=0.662 @3px=0.921 @10px=0.967 med=0.70 inl=339 ms=695
+aliked_n16rot_mnn_track                  geo   n=420 ok=0.964 @1px=0.488 @3px=0.829 @10px=0.943 med=1.06 inl=271 ms=1096
+aliked_n16rot_mnn_track                  hard  n=420 ok=0.619 @1px=0.043 @3px=0.260 @10px=0.486 med=10.82 inl=69 ms=1245
+Loading weights:   0%|          | 0/447 [00:00<?, ?it/s]Loading weights: 100%|██████████| 447/447 [00:00<00:00, 8505.21it/s]

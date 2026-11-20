@@ -1,0 +1,15 @@
+{"method": "track_sift", "frames": 235, "registered": 0, "registered_%": 0.0, "le_5m_%": 0.0, "le_15m_%": 0.0, "err_m_median": NaN, "err_m_p90": NaN, "inliers_median_all": 0.0, "inliers_median_ok": NaN, "scale_median_ok": NaN, "s_per_frame": 0.115, "vram_peak_mb": 0}
+{"method": "track_sift_lg", "frames": 235, "registered": 31, "registered_%": 13.2, "le_5m_%": 12.8, "le_15m_%": 13.2, "err_m_median": 2.74, "err_m_p90": 4.03, "inliers_median_all": 6.0, "inliers_median_ok": 44.0, "scale_median_ok": 0.232, "s_per_frame": 0.196, "vram_peak_mb": 101}
+{"method": "track_superpoint_lg", "frames": 235, "registered": 61, "registered_%": 26.0, "le_5m_%": 25.5, "le_15m_%": 26.0, "err_m_median": 2.57, "err_m_p90": 3.41, "inliers_median_all": 6.0, "inliers_median_ok": 58.0, "scale_median_ok": 0.228, "s_per_frame": 0.083, "vram_peak_mb": 209}
+{"method": "track_aliked_lg", "frames": 235, "registered": 54, "registered_%": 23.0, "le_5m_%": 21.7, "le_15m_%": 22.6, "err_m_median": 2.5, "err_m_p90": 3.62, "inliers_median_all": 0.0, "inliers_median_ok": 48.0, "scale_median_ok": 0.229, "s_per_frame": 0.113, "vram_peak_mb": 510}
+{"method": "track_disk_lg", "frames": 235, "registered": 52, "registered_%": 22.1, "le_5m_%": 21.3, "le_15m_%": 21.7, "err_m_median": 2.51, "err_m_p90": 4.3, "inliers_median_all": 5.0, "inliers_median_ok": 114.5, "scale_median_ok": 0.229, "s_per_frame": 0.257, "vram_peak_mb": 518}
+{"method": "track_xfeat", "frames": 235, "registered": 70, "registered_%": 29.8, "le_5m_%": 27.2, "le_15m_%": 29.8, "err_m_median": 2.64, "err_m_p90": 4.73, "inliers_median_all": 14.0, "inliers_median_ok": 45.5, "scale_median_ok": 0.232, "s_per_frame": 0.037, "vram_peak_mb": 58}
+{"method": "track_eloftr_official", "frames": 235, "registered": 69, "registered_%": 29.4, "le_5m_%": 27.2, "le_15m_%": 29.4, "err_m_median": 2.56, "err_m_p90": 4.23, "inliers_median_all": 8.0, "inliers_median_ok": 52.0, "scale_median_ok": 0.228, "s_per_frame": 0.113, "vram_peak_mb": 581}
+{"method": "track_loftr", "frames": 235, "registered": 70, "registered_%": 29.8, "le_5m_%": 27.2, "le_15m_%": 29.8, "err_m_median": 2.49, "err_m_p90": 4.21, "inliers_median_all": 9.0, "inliers_median_ok": 61.0, "scale_median_ok": 0.228, "s_per_frame": 0.197, "vram_peak_mb": 527}
+{"method": "track_superglue_official", "frames": 235, "registered": 56, "registered_%": 23.8, "le_5m_%": 23.8, "le_15m_%": 23.8, "err_m_median": 2.49, "err_m_p90": 3.12, "inliers_median_all": 5.0, "inliers_median_ok": 40.5, "scale_median_ok": 0.227, "s_per_frame": 0.096, "vram_peak_mb": 207}
+Traceback (most recent call last):
+torch.AcceleratorError: CUDA error: device-side assert triggered
+Search for `cudaErrorAssert' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+Traceback (most recent call last):
+torch.AcceleratorError: CUDA error: device-side assert triggered
+Search for `cudaErrorAssert' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.

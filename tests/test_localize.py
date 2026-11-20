@@ -54,3 +54,31 @@ def test_outlier_rejection_and_interpolation():
     assert bool(out["rejected"].iloc[4])
     assert list(out["status"].iloc[[4, 7]]) == ["interp", "interp"]
     assert np.allclose(out[["x", "y"]].to_numpy(), np.stack([np.arange(10) * 100.0, np.zeros(10)], 1))
+
+
+def test_track_with_start_prior_needs_no_global_search(tmp_path, monkeypatch):
+    """tracking.init_prior=gt: the first frame is found in a ROI around the known start, never globally."""
+    from vo.track import TrackLocalizer
+
+    world = make_world(1600, 1200, seed=7)
+    imwrite(tmp_path / "map.png", world)
+    data = make_flight(tmp_path / "syn", n_frames=12, frame_size=(400, 300), turns=0.0, tilt_std=2e-5, seed=7,
+                       world_path=tmp_path / "map.png", frame_scale=0.5)
+
+    class NoGlobal:  # the global SIFT search always fails (as on a real cross-sensor flight)
+        def localize(self, frame):
+            from vo.localize import MapFix
+            return MapFix(False, None, reason="global search disabled")
+
+    calls = []
+    monkeypatch.setattr(TrackLocalizer, "global_localizer", lambda self: calls.append(1) or NoGlobal())
+    cfg = load_config(None, [
+        f"map.path={tmp_path / 'map.png'}", f"data.frames={data / 'frames'}", f"data.gt={data / 'gt.csv'}",
+        "localize.mode=track", "localize.frame_scale=0.5", "localize.min_inliers=10", "tracking.init_prior=gt",
+        "tracking.rotation=none", f"output.dir={tmp_path / 'out'}",
+    ])
+    m = run_localization(cfg)
+    traj = read_trajectory(tmp_path / "out" / m["run_id"] / "trajectory.csv")
+    assert traj["source"].iloc[0] == "roi"  # first frame found around the prior, not by a global search
+    assert m["n_registered"] >= 10 and len(calls) <= 2  # the weak procedural texture may drop a frame
+    assert m["center_err_median"] < 2.0

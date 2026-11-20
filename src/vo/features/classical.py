@@ -10,19 +10,27 @@ from .base import Extractor, Features
 BINARY = {"orb", "akaze", "brisk"}
 
 
+def _factory(name: str):
+    """cv2.<name>; OpenCV 5 moved AKAZE / BRISK / KAZE from the main module to cv2.xfeatures2d (contrib)."""
+    fn = getattr(cv2, name, None) or getattr(getattr(cv2, "xfeatures2d", None), name, None)
+    if fn is None:
+        raise ImportError(f"cv2.{name} not found (OpenCV {cv2.__version__}); install opencv-contrib-python")
+    return fn
+
+
 def _create(kind: str, max_kp: int, params: dict):
     if kind in ("sift", "rootsift"):
-        return cv2.SIFT_create(nfeatures=max_kp, **params)
+        return _factory("SIFT_create")(nfeatures=max_kp, **params)
     if kind == "orb":
         p = {"scaleFactor": 1.2, "nlevels": 8, "fastThreshold": 10}
         p.update(params)
         return cv2.ORB_create(nfeatures=max_kp, **p)
     if kind == "akaze":
-        return cv2.AKAZE_create(**params)
+        return _factory("AKAZE_create")(**params)
     if kind == "brisk":
-        return cv2.BRISK_create(**params)
+        return _factory("BRISK_create")(**params)
     if kind == "kaze":
-        return cv2.KAZE_create(**params)
+        return _factory("KAZE_create")(**params)
     raise ValueError(f"Unknown classical feature type: {kind}")
 
 

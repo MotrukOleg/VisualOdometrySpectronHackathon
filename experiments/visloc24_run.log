@@ -1,0 +1,72 @@
+=== track_sift 20:25:52
+  "success@5px": 0.0,
+  "success@10px": 0.0,
+  "success@25px": 0.0,
+  "t_total_s": 24.01449049997609,
+  "out_dir": "experiments\\results\\visloc24_track_sift"
+}
+=== done track_sift 20:26:20
+=== track_sift_lg 20:26:20
+  "success@5px": 0.0,
+  "success@10px": 0.0,
+  "success@25px": 0.0,
+  "t_total_s": 25.21642549999524,
+  "out_dir": "experiments\\results\\visloc24_track_sift_lg"
+}
+=== done track_sift_lg 20:26:48
+=== track_superpoint_lg 20:26:48
+  "success@5px": 0.0,
+  "success@10px": 0.0,
+  "success@25px": 0.0,
+  "t_total_s": 23.195872399955988,
+  "out_dir": "experiments\\results\\visloc24_track_superpoint_lg"
+}
+=== done track_superpoint_lg 20:27:15
+=== track_aliked_lg 20:27:15
+  "success@5px": 0.0,
+  "success@10px": 0.0,
+  "success@25px": 0.0,
+  "t_total_s": 23.272372900042683,
+  "out_dir": "experiments\\results\\visloc24_track_aliked_lg"
+}
+=== done track_aliked_lg 20:27:41
+=== track_xfeat 20:27:41
+  "success@5px": 0.0,
+  "success@10px": 0.0,
+  "success@25px": 0.0,
+  "t_total_s": 21.910083700087853,
+  "out_dir": "experiments\\results\\visloc24_track_xfeat"
+}
+=== done track_xfeat 20:28:06
+=== track_eloftr_official 20:28:06
+  "success@5px": 0.0,
+  "success@10px": 0.0,
+  "success@25px": 0.0,
+  "t_total_s": 23.2362293000333,
+  "out_dir": "experiments\\results\\visloc24_track_eloftr_official"
+}
+=== done track_eloftr_official 20:28:32
+=== track_disk_lg 20:28:32
+  "success@5px": 0.0,
+  "success@10px": 0.0,
+  "success@25px": 0.0,
+  "t_total_s": 26.497804299928248,
+  "out_dir": "experiments\\results\\visloc24_track_disk_lg"
+}
+=== done track_disk_lg 20:29:03
+=== track_loftr 20:29:03
+  "success@5px": 0.0,
+  "success@10px": 0.0,
+  "success@25px": 0.0,
+  "t_total_s": 24.505521500017494,
+  "out_dir": "experiments\\results\\visloc24_track_loftr"
+}
+=== done track_loftr 20:29:31
+=== track_roma 20:29:31
+  "success@5px": 0.0,
+  "success@10px": 0.0,
+  "success@25px": 0.0,
+  "t_total_s": 62.22598500002641,
+  "out_dir": "experiments\\results\\visloc24_track_roma"
+}
+=== done track_roma 20:30:36

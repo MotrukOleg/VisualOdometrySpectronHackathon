@@ -87,6 +87,13 @@ class ImagePairMatcher(PairMatcher):
     def __init__(self, preprocess=None):
         self.preprocess = preprocess
 
+    def _short_side(self, img) -> float:
+        """Shorter image side after the matcher's own `resize_long_side` cap (if any)."""
+        h, w = img.shape[:2]
+        rl = getattr(self, "resize_long_side", None)
+        s = min(1.0, rl / max(h, w)) if rl else 1.0
+        return min(h, w) * s
+
     @abstractmethod
     def match_images(self, img0: np.ndarray, img1: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Returns pts0 (K,2), pts1 (K,2), conf (K,)."""
@@ -95,6 +102,11 @@ class ImagePairMatcher(PairMatcher):
         if self.preprocess:
             img0, img1 = self.preprocess(img0), self.preprocess(img1)
         t0 = time.perf_counter()
+        if min(self._short_side(img0), self._short_side(img1)) < 32:
+            # e.g. a long thin map window clipped at the map border after a wrong prediction: dense matchers
+            # round sizes down to a multiple of 32 and would divide by zero; report "no matches" instead
+            empty = np.zeros((0, 2), np.float32)
+            return Correspondences(empty, empty, np.zeros(0, np.float32), 0, 0, {"match": 0.0})
         p0, p1, c = self.match_images(img0, img1)
         t = time.perf_counter() - t0
         return Correspondences(p0.astype(np.float32), p1.astype(np.float32), c.astype(np.float32),

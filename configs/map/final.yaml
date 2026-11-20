@@ -1,0 +1,6 @@
+# Final method (chosen 2026-11-20 on three benchmarks: task map + own videos, exact-GT pairs, any-area):
+# SIFT keypoints + LightGlue matcher, tracking in a map ROI with derotation by the predicted heading;
+# global SIFT + FLANN over the whole map for the first frame and after a loss (re-initialisation).
+# Evidence: experiments/map_report.md, experiments/pairs/finetune_pos_crops/report.md, experiments/areas_report.md.
+base: methods/track_sift_lg.yaml
+name: final_sift_lightglue

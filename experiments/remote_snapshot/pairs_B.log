@@ -1,0 +1,8 @@
+aliked_lightglue_track                   plain n=420 ok=0.995 @1px=0.762 @3px=0.979 @10px=0.993 med=0.52 inl=391 ms=223
+aliked_lightglue_track                   geo   n=420 ok=0.988 @1px=0.524 @3px=0.843 @10px=0.974 med=0.96 inl=311 ms=209
+aliked_lightglue_track                   hard  n=420 ok=0.762 @1px=0.031 @3px=0.336 @10px=0.602 med=5.88 inl=104 ms=202
+disk_lightglue_track                     plain n=420 ok=0.998 @1px=0.719 @3px=0.938 @10px=0.986 med=0.40 inl=523 ms=267
+disk_lightglue_track                     geo   n=420 ok=0.993 @1px=0.533 @3px=0.795 @10px=0.952 med=0.88 inl=432 ms=267
+disk_lightglue_track                     hard  n=420 ok=0.783 @1px=0.040 @3px=0.307 @10px=0.581 med=6.91 inl=213 ms=945
+efficient_loftr_official_track           plain n=420 ok=1.000 @1px=0.955 @3px=0.990 @10px=0.995 med=0.12 inl=1148 ms=2410
+efficient_loftr_official_track           geo   n=420 ok=0.995 @1px=0.736 @3px=0.964 @10px=0.990 med=0.57 inl=901 ms=1620

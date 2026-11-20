@@ -204,6 +204,15 @@ def run_localization(cfg: dict, out_dir: str | Path | None = None) -> dict:
         from .track import TrackLocalizer
 
         loc = TrackLocalizer(map_bgr, cfg, device)
+        prior = cfg["tracking"].get("init_prior")
+        if prior is not None:
+            if prior == "gt":
+                g0 = load_gt(d.get("gt"), source)
+                if g0 is None or not np.all(np.isfinite(g0[0])):
+                    raise ValueError("tracking.init_prior=gt needs a GT position for the first frame")
+                prior = g0[0]
+            loc.set_prior(prior, float(cfg["localize"]["frame_scale"]), float(cfg["tracking"].get("init_heading", 0)))
+            log.info("track: start prior %s", np.round(np.asarray(prior, float), 1))
     elif mode == "tiles":
         from .track import TileLocalizer
 

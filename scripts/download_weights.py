@@ -3,8 +3,15 @@
 Run once on a new machine (e.g. a vast.ai instance) so that experiments do not stall on downloads.
     python scripts/download_weights.py            # everything except full RoMa
     python scripts/download_weights.py --roma-full
+    python scripts/download_weights.py --from-dir weights/torch_hub   # offline: copy a saved torch-hub cache first
+
+`weights/torch_hub/` (gitignored) holds a copy of the torch-hub cache (checkpoints/ + the XFeat hub repo) taken from
+a machine where the downloads worked; `--from-dir` copies it into torch.hub.get_dir() and then loads every model, so
+GitHub is not needed (HF models still come from the Hugging Face cache).
 """
 import argparse
+import shutil
+from pathlib import Path
 import sys
 import time
 import traceback
@@ -22,8 +29,21 @@ def step(name, fn):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--roma-full", action="store_true", help="also RoMa outdoor + DINOv2 ViT-L (~1.6 GB)")
+    ap.add_argument("--from-dir", help="saved torch-hub cache to install before loading (e.g. weights/torch_hub)")
     a = ap.parse_args()
     import torch
+
+    if a.from_dir:
+        src, dst = Path(a.from_dir), Path(torch.hub.get_dir())
+        n = 0
+        for f in src.rglob("*"):
+            if f.is_file() and f.suffix != ".sha256" and "__pycache__" not in f.parts:
+                t = dst / f.relative_to(src)
+                if not t.exists() or t.stat().st_size != f.stat().st_size:
+                    t.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(f, t)
+                    n += 1
+        print(f"installed {n} files from {src} into torch hub cache", flush=True)
 
     def lg():
         import lightglue as L

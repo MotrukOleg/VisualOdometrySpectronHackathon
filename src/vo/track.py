@@ -131,6 +131,11 @@ class TrackLocalizer(_Base):
         self.history: list = []  # (index, MapFix) of good fixes
         self.k = -1
         self.sources: dict[str, int] = {}
+        self.prior = None  # (center, scale, heading) used until the first good fix
+
+    def set_prior(self, center, scale: float, heading: float = 0.0):
+        """Known start pose (e.g. take-off GPS): ROI search around it instead of the global init."""
+        self.prior = (np.asarray(center, float), float(scale), float(heading))
 
     def _predict(self):
         (i1, f1) = self.history[-1]
@@ -142,11 +147,17 @@ class TrackLocalizer(_Base):
         return center, f1.scale, f1.heading_deg
 
     def _roi(self, center, scale, w, h, factor):
+        """Map window around the predicted centre, clipped to the map; None if (almost) nothing of it is on the map."""
+        if not (np.all(np.isfinite(center)) and np.isfinite(scale)):
+            return None
         side = max(self.tc["min_roi"], factor * scale * np.hypot(w, h))
         x0, y0 = np.floor(center - side / 2).astype(int)
         x1, y1 = np.ceil(center + side / 2).astype(int)
         W, H = self.map_size
-        return max(0, x0), max(0, y0), min(W, x1), min(H, y1)
+        x0, y0, x1, y1 = max(0, x0), max(0, y0), min(W, x1), min(H, y1)
+        if x1 - x0 < 64 or y1 - y0 < 64:
+            return None
+        return x0, y0, x1, y1
 
     def _rotations(self, heading):
         mode = self.tc.get("rotation", "predicted")
@@ -160,13 +171,17 @@ class TrackLocalizer(_Base):
         self.k += 1
         h, w = frame.shape[:2]
         fix, source = None, "init"
-        if self.history:
-            center, scale, heading = self._predict()
+        if self.history or self.prior is not None:
+            center, scale, heading = self._predict() if self.history else self.prior
             # auto_scale: frame resized to the map resolution with the predicted scale;
             # otherwise a fixed resize factor (localize.frame_scale), as in the global mode
             fscale = scale if self.tc.get("auto_scale", True) else float(self.cfg["localize"]["frame_scale"])
             for factor in (self.tc["roi_factor"], self.tc["roi_retry_factor"]):
                 roi = self._roi(center, scale, w, h, factor)
+                if roi is None or min(w, h) * fscale < 64:
+                    # prediction left the map, or a wrong fix predicted a tiny frame (dense matchers need >= 32 px
+                    # after rounding to their stride): fall back to re-initialisation
+                    continue
                 cands = [self.match_region(frame, *roi, fscale, r) for r in self._rotations(heading)]
                 best = max(cands, key=lambda f: (f.ok, f.n_inliers))
                 tsum = {k: sum(c.timings[k] for c in cands) for k in cands[0].timings}

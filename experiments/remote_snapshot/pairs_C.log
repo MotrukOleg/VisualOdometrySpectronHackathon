@@ -1,0 +1,5 @@
+dedode_v2_mnn_track                      plain n=120 ok=1.000 @1px=1.000 @3px=1.000 @10px=1.000 med=0.00 inl=1088 ms=10890
+dedode_v2_mnn_track                      geo   n=120 ok=1.000 @1px=0.642 @3px=0.950 @10px=1.000 med=0.68 inl=762 ms=7273
+dedode_v2_mnn_track                      hard  n=120 ok=0.792 @1px=0.042 @3px=0.383 @10px=0.642 med=5.42 inl=212 ms=7767
+2026-11-20 13:06:46.286 +00:00 | INFO     | romatch.models.model_zoo.roma_models:roma_model:61 - Using coarse resolution (560, 560), and upsample res (864, 864)
+roma_track                               plain n=120 ok=1.000 @1px=0.967 @3px=0.975 @10px=0.975 med=0.10 inl=2789 ms=8630

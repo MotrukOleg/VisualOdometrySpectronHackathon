@@ -1,0 +1,23 @@
+efficient_loftr_track                    plain n=420 ok=0.971 @1px=0.017 @3px=0.107 @10px=0.205 med=53.20 inl=808 ms=293
+efficient_loftr_track                    geo   n=420 ok=0.814 @1px=0.000 @3px=0.007 @10px=0.010 med=231.93 inl=57 ms=300
+efficient_loftr_track                    hard  n=420 ok=0.319 @1px=0.000 @3px=0.000 @10px=0.002 med=inf inl=18 ms=297
+orb_bf_track                             plain n=420 ok=0.993 @1px=0.538 @3px=0.779 @10px=0.929 med=0.87 inl=589 ms=70
+orb_bf_track                             geo   n=420 ok=0.960 @1px=0.348 @3px=0.633 @10px=0.817 med=1.77 inl=392 ms=70
+orb_bf_track                             hard  n=420 ok=0.636 @1px=0.014 @3px=0.210 @10px=0.429 med=17.97 inl=93 ms=42
+sift_flann_track                         plain n=420 ok=0.971 @1px=0.912 @3px=0.962 @10px=0.969 med=0.08 inl=595 ms=171
+sift_flann_track                         geo   n=420 ok=0.945 @1px=0.840 @3px=0.907 @10px=0.938 med=0.19 inl=383 ms=167
+sift_flann_track                         hard  n=420 ok=0.419 @1px=0.033 @3px=0.214 @10px=0.345 med=inf inl=28 ms=135
+sift_adalam_track                        plain n=420 ok=0.964 @1px=0.893 @3px=0.931 @10px=0.960 med=0.09 inl=610 ms=167
+sift_adalam_track                        geo   n=420 ok=0.931 @1px=0.819 @3px=0.886 @10px=0.924 med=0.20 inl=403 ms=173
+sift_adalam_track                        hard  n=420 ok=0.436 @1px=0.031 @3px=0.212 @10px=0.350 med=inf inl=37 ms=154
+sift_lightglue_track                     plain n=420 ok=1.000 @1px=0.933 @3px=0.995 @10px=1.000 med=0.16 inl=458 ms=300
+sift_lightglue_track                     geo   n=420 ok=1.000 @1px=0.712 @3px=0.898 @10px=0.981 med=0.44 inl=349 ms=307
+sift_lightglue_track                     hard  n=420 ok=0.840 @1px=0.086 @3px=0.388 @10px=0.698 med=4.22 inl=162 ms=411
+xfeat_track                              plain n=420 ok=0.990 @1px=0.469 @3px=0.748 @10px=0.924 med=1.11 inl=733 ms=27
+xfeat_track                              geo   n=420 ok=0.960 @1px=0.243 @3px=0.567 @10px=0.812 med=2.29 inl=506 ms=28
+xfeat_track                              hard  n=420 ok=0.757 @1px=0.012 @3px=0.240 @10px=0.457 med=14.48 inl=194 ms=62
+xfeat_star_track                         plain n=420 ok=0.976 @1px=0.088 @3px=0.781 @10px=0.945 med=1.78 inl=1137 ms=64
+xfeat_star_track                         geo   n=420 ok=0.957 @1px=0.038 @3px=0.681 @10px=0.898 med=2.20 inl=776 ms=57
+xfeat_star_track                         hard  n=420 ok=0.762 @1px=0.002 @3px=0.229 @10px=0.574 med=7.23 inl=283 ms=83
+saved experiments\pairs\finetune_pos_crops\results_local.csv
+LOCAL_DONE

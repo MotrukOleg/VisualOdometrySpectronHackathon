@@ -24,16 +24,32 @@ F2F_GEOM = {"model": "homography", "estimator": "magsac", "reproj_threshold": 3.
             "min_scale": 0.3, "max_scale": 3.0, "max_perspective": 0.01}
 
 
-def frame_to_frame(frames_dir: str | Path, cache: str | Path, frame_scale: float = 0.35) -> dict:
-    """{(i, i+1): T (frame i+1 -> frame i, ORIGINAL px)} for consecutive frames; cached in an .npz file."""
+# Matchers for the frame-to-frame reference. A localisation run checked against f2f of the SAME matcher shares its
+# errors (they cancel), so "cross" consistency averages the check over matchers of different families.
+F2F_MATCHERS = {
+    "sift": ["features.type=sift", "matching.type=flann", "matching.ratio=0.75"],
+    "splg": ["features.type=superpoint", "features.max_keypoints=2048", "matching.type=lightglue", "matching.ratio=null"],
+    "loftr": ["matching.type=loftr"],
+}
+
+
+def frame_to_frame(frames_dir: str | Path, cache: str | Path, frame_scale: float = 0.35, step: int = 1,
+                   matcher: str = "sift") -> dict:
+    """{(i, i+1): T (frame i+1 -> frame i, ORIGINAL px)} for consecutive frames of the (sub-sampled) sequence;
+    indices refer to the sequence after `step`. `matcher` is a key of F2F_MATCHERS. Cached in an .npz file."""
     cache = Path(cache)
     if cache.exists():
         z = np.load(cache)
         return {(int(i), int(j)): T for i, j, T in zip(z["i"], z["j"], z["T"])}
-    src = FrameSource(frames_dir, scale=frame_scale)
-    cfg = load_config(None, [f"data.frames={frames_dir}", "features.type=sift", "matching.type=flann",
-                             "matching.ratio=0.75"])
-    matcher = build_pair_matcher(cfg, "cpu")
+    frames_dir = str(frames_dir).split("#")[0]
+    src = FrameSource(frames_dir, step=step, scale=frame_scale)
+    cfg = load_config(None, [f"data.frames={frames_dir}"] + F2F_MATCHERS[matcher])
+    device = "cpu"
+    if matcher != "sift":
+        import torch
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    matcher = build_pair_matcher(cfg, device)
     S = np.diag([frame_scale, frame_scale, 1.0])
     out = {}
     for i in range(len(src) - 1):
@@ -67,6 +83,7 @@ def consistency(traj: pd.DataFrame, f2f: dict, frame_size: tuple[int, int]) -> d
 
 
 def agreement(traj: pd.DataFrame, ref: pd.DataFrame) -> dict:
+    ref = ref.set_index("name").reindex(traj["name"])  # align by frame name (runs may cover a subset)
     a = traj[["x", "y"]].to_numpy(float)
     b = ref[["x", "y"]].to_numpy(float)
     ok = np.all(np.isfinite(a), 1) & np.all(np.isfinite(b), 1) & traj["status"].isin(["map", "interp"]).to_numpy()

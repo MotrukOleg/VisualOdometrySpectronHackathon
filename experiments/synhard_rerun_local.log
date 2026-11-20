@@ -1,0 +1,18 @@
+map_baseline_sift                                       syn_hard   ok    reg=1.000 err_med=0.72 cons=0.100 dev=nan fps=10.0 15s
+akaze_bf_global                                         syn_hard   ok    reg=0.925 err_med=0.31 cons=0.225 dev=0.63 fps=15.3 10s
+brisk_bf_global                                         syn_hard   ok    reg=0.950 err_med=0.30 cons=0.215 dev=0.68 fps=11.2 14s
+orb_bf_global                                           syn_hard   ok    reg=1.000 err_med=0.54 cons=0.253 dev=1.12 fps=0.7 112s
+rootsift_flann_global                                   syn_hard   ok    reg=1.000 err_med=0.71 cons=0.094 dev=0.02 fps=11.5 11s
+sift_flann_global                                       syn_hard   ok    reg=1.000 err_med=0.72 cons=0.097 dev=0.01 fps=11.2 11s
+sift_mnn_global                                         syn_hard   ok    reg=1.000 err_med=0.72 cons=0.088 dev=0.03 fps=1.1 78s
+akaze_bf_track                                          syn_hard   ok    reg=1.000 err_med=0.67 cons=0.129 dev=0.36 fps=4.2 20s
+efficient_loftr_official_track                          syn_hard   ok    reg=1.000 err_med=0.65 cons=0.210 dev=0.35 fps=1.2 68s
+loftr_track                                             syn_hard   ok    reg=1.000 err_med=0.68 cons=0.263 dev=0.48 fps=1.5 54s
+orb_bf_track                                            syn_hard   ok    reg=1.000 err_med=0.69 cons=0.271 dev=0.37 fps=6.0 15s
+sift_flann_track                                        syn_hard   ok    reg=1.000 err_med=0.65 cons=0.120 dev=0.35 fps=2.6 32s
+sift_adalam_track                                       syn_hard   ok    reg=1.000 err_med=0.67 cons=0.122 dev=0.34 fps=2.7 31s
+sift_lightglue_track                                    syn_hard   ok    reg=1.000 err_med=0.66 cons=0.234 dev=0.32 fps=1.5 57s
+superpoint_superglue_official_track                     syn_hard   ok    reg=1.000 err_med=0.63 cons=0.226 dev=0.39 fps=0.9 87s
+superpoint_lightglue_track                              syn_hard   ok    reg=1.000 err_med=0.61 cons=0.221 dev=0.39 fps=0.9 87s
+xfeat_track                                             syn_hard   ok    reg=1.000 err_med=0.70 cons=0.373 dev=0.59 fps=12.2 8s
+SYNHARD_LOCAL_DONE

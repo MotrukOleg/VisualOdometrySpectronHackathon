@@ -6,3 +6,9 @@ lviv_old_town:   {center: [49.8419, 24.0316], size_km: [2.8, 1.4], zoom: 17, ter
 kyiv_dnipro:     {center: [50.4440, 30.5560], size_km: [2.8, 1.4], zoom: 17, terrain: "city, river, bridges, parks"}
 carpathians:     {center: [48.3600, 24.4100], size_km: [2.8, 1.4], zoom: 17, terrain: "mountain forest, ski slopes (Bukovel)"}
 poltava_fields:  {center: [49.5000, 34.3000], size_km: [2.8, 1.4], zoom: 17, terrain: "farmland, repetitive fields"}
+# Hard terrains with few / ambiguous keypoints (2026-11-20): to show where each matcher breaks.
+oleshky_sands:   {center: [46.5806, 33.0441], size_km: [2.8, 1.4], zoom: 17, terrain: "sand dunes, repetitive low-contrast texture"}
+gorgany_forest:  {center: [48.5300, 24.1800], size_km: [2.8, 1.4], zoom: 17, terrain: "continuous mountain forest, few roads"}
+kyiv_sea:        {center: [50.7800, 30.4300], size_km: [2.8, 1.4], zoom: 17, terrain: "large reservoir + shoreline (frames over open water)"}
+askania_steppe:  {center: [46.4600, 33.8800], size_km: [2.8, 1.4], zoom: 17, terrain: "uniform steppe"}
+tylihul_estuary: {center: [46.8500, 31.1500], size_km: [2.8, 1.4], zoom: 17, terrain: "estuary: water, salt flats, shallows"}

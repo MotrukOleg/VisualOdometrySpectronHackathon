@@ -1,0 +1,4 @@
+base: ../baseline_sift.yaml
+name: superpoint_superglue_official_track
+localize: {mode: track}
+matching: {type: superglue, resize_long: 1024, params: {weights: outdoor, max_keypoints: 2048, match_threshold: 0.2}}

@@ -1,0 +1,16 @@
+{
+  "name": "drone-navigation-presentation",
+  "private": true,
+  "description": "reveal.js slides for the It-Jim CV test task 2026 (Advanced): drone navigation on a satellite map",
+  "scripts": {
+    "serve": "http-server . -p 8000 -c-1",
+    "pdf": "msedge --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=20000 --print-to-pdf=slides.pdf \"http://localhost:8000/index.html?print-pdf\""
+  },
+  "dependencies": {
+    "reveal.js": "5.1.0",
+    "katex": "0.16.11"
+  },
+  "devDependencies": {
+    "http-server": "14.1.1"
+  }
+}

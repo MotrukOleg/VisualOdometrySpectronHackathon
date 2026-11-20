@@ -104,6 +104,10 @@ DEFAULTS: dict[str, Any] = {
         "rotation": "predicted",  # none | predicted (derotate by predicted heading) | test (try 4 rotations)
         "motion_model": "constant_velocity",  # or 'static'
         "tile_factor": 1.6,  # tiles mode: tile side = factor * footprint diagonal, stride = side / 2
+        # known start (e.g. take-off GPS): null | "gt" (first GT position) | [x, y] in map px. The first frames are
+        # then matched in a ROI around it with the method's own matcher instead of the global SIFT search.
+        "init_prior": None,
+        "init_heading": 0.0,  # heading (deg) assumed with init_prior; scale = localize.frame_scale
     },
     "smoothing": {
         "outlier_factor": 4.0,  # a fix is an outlier if it is > factor * median step from its neighbours

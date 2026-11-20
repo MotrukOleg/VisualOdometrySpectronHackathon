@@ -79,7 +79,7 @@ def postprocess(traj: pd.DataFrame, cfg: dict) -> pd.DataFrame:
         span = np.flatnonzero(ok)
         sl = slice(span[0], span[-1] + 1)  # contiguous after interpolation
         for col in ("x", "y"):
-            vals = df[col].to_numpy(float)
+            vals = df[col].to_numpy(float).copy()  # pandas >= 3 (copy-on-write) returns read-only views
             smoothed = savgol_filter(vals[sl], w, cfg["savgol_order"])
             shift = smoothed - vals[sl]
             vals[sl] = smoothed
@@ -87,7 +87,7 @@ def postprocess(traj: pd.DataFrame, cfg: dict) -> pd.DataFrame:
             # move the footprint together with its centre
             for c in CORNER_COLS:
                 if c.endswith(col[-1]):
-                    cv = df[c].to_numpy(float)
+                    cv = df[c].to_numpy(float).copy()
                     cv[sl] += shift
                     df[c] = cv
     return df

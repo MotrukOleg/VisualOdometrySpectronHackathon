@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "slides",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["docs/presentation/node_modules/http-server/bin/http-server", "docs/presentation", "-p", "8000", "-c-1", "--silent"],
+      "port": 8000
+    }
+  ]
+}

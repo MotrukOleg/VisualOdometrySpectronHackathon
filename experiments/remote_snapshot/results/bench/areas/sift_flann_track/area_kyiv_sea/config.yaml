@@ -1,0 +1,99 @@
+name: sift_flann_track
+device: auto
+seed: 0
+data:
+  frames: data/areas/kyiv_sea/flight/frames
+  gt: data/areas/kyiv_sea/flight/gt.csv
+  start: 0
+  step: 1
+  max_frames: null
+  resize_long: 1280
+  scale: 1.0
+preprocess:
+  clahe: false
+  clahe_clip: 2.0
+  clahe_grid: 8
+  blur_sigma: 0.0
+  screen_mask: false
+features:
+  type: sift
+  max_keypoints: 4000
+  params: {}
+matching:
+  type: flann
+  ratio: 0.75
+  cross_check: false
+  resize_long: null
+  params: {}
+geometry:
+  model: homography
+  estimator: magsac
+  reproj_threshold: 3.0
+  confidence: 0.999
+  max_iters: 5000
+  min_inliers: 15
+  min_scale: 0.5
+  max_scale: 2.0
+  max_perspective: 0.002
+graph:
+  fallback_skips:
+  - 2
+  - 3
+  extra_skips: []
+  loop_closure: false
+  loop_min_gap: 20
+  loop_radius: 0.5
+  loop_stride: 2
+  loop_max_candidates: 200
+  loop_min_inliers: 40
+  optimize: false
+  opt_points_per_edge: 40
+  opt_loss: huber
+  opt_f_scale: 2.0
+mosaic:
+  enabled: true
+  scale: 0.5
+  max_canvas_px: 6000
+  blend: feather
+  every: 1
+eval:
+  rpe_delta: 10
+  photometric_every: 5
+  success_thresholds:
+  - 5
+  - 10
+  - 25
+map:
+  path: data/areas/kyiv_sea/map.jpg
+  scale: 1.0
+  max_keypoints: 60000
+localize:
+  mode: track
+  frame_scale: 0.5
+  min_inliers: 20
+  reproj_threshold: 5.0
+  min_scale: 0.02
+  max_scale: 5.0
+  max_perspective: 0.01
+tracking:
+  roi_factor: 1.6
+  roi_retry_factor: 3.0
+  min_roi: 256
+  work_scale: 1.0
+  auto_scale: true
+  rotation: predicted
+  motion_model: constant_velocity
+  tile_factor: 1.6
+smoothing:
+  outlier_factor: 4.0
+  outlier_min_px: 50.0
+  interpolate: true
+  savgol_window: 0
+  savgol_order: 2
+viz:
+  footprints: true
+  label_every: 0
+  zoom_margin: 150
+output:
+  dir: experiments/results
+  save_mosaic: true

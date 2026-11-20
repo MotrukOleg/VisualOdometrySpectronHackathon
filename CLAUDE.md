@@ -75,6 +75,7 @@ $py = "E:\Anaconda\envs\MachineLearning\python.exe"
 & $py scripts/extract_frames.py video.mp4 --out data/video/frames --every 5
 & $py scripts/make_area.py --area lviv_old_town                       # будь-яка місцевість: мапа з тайлів + політ із GT
 & $py scripts/export_gps.py --run <run> --geo data/areas/<name>/geo.json   # lat/lon, GeoJSON, інтерактивна мапа
+& $py -m app                                                          # демо Mission Replay: http://127.0.0.1:8080 (app/README.md)
 ```
 
 **Будь-яка місцевість** (`src/vo/tiles.py`, `scripts/make_area.py`, райони — `configs/areas.yaml`): мапа з тайлів

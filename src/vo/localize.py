@@ -180,8 +180,13 @@ def _fix_row(k: int, name: str, orig_idx: int, fix: MapFix) -> dict:
     return row
 
 
-def run_localization(cfg: dict, out_dir: str | Path | None = None) -> dict:
-    """Localise every frame on the map, post-process, draw the route; returns metrics."""
+def run_localization(cfg: dict, out_dir: str | Path | None = None, progress=None) -> dict:
+    """Localise every frame on the map, post-process, draw the route; returns metrics.
+
+    `progress(event, payload)` (optional) is called with "start" (frame count, map size, GT), "frame" (the raw
+    per-frame row, before post-processing) and "done" (final trajectory + metrics). It lets a UI stream the run;
+    an exception raised inside it aborts the run.
+    """
     from .viz import render_route
 
     t_start = time.perf_counter()
@@ -225,10 +230,17 @@ def run_localization(cfg: dict, out_dir: str | Path | None = None) -> dict:
     if torch is not None and torch.cuda.is_available():
         torch.cuda.reset_peak_memory_stats()
 
+    gt = load_gt(d.get("gt"), source)
+    if progress:
+        progress("start", {"run_id": run_id, "n_frames": len(source), "names": [source.name(k) for k in range(len(source))],
+                           "map_size": [map_bgr.shape[1], map_bgr.shape[0]], "mode": mode, "device": device,
+                           "gt": gt.tolist() if gt is not None else None})
     rows = []
     for k in tqdm(range(len(source)), desc="localise", unit="frame"):
         fix = loc.localize(source.load(k))
         rows.append(_fix_row(k, source.name(k), source.indices[k], fix))
+        if progress:
+            progress("frame", rows[-1])
     raw = pd.DataFrame(rows)
     traj = postprocess(raw, cfg["smoothing"])
     write_trajectory(traj, out / "trajectory.csv")
@@ -255,7 +267,6 @@ def run_localization(cfg: dict, out_dir: str | Path | None = None) -> dict:
     metrics["registered_rate"] = metrics["n_registered"] / max(n, 1)
     metrics["fps"] = n / float((raw["t_extract"] + raw["t_match"] + raw["t_geom"]).sum())
 
-    gt = load_gt(d.get("gt"), source)
     if gt is not None:
         metrics.update(localization_metrics(traj, gt, cfg["eval"]["success_thresholds"]))
 
@@ -265,6 +276,8 @@ def run_localization(cfg: dict, out_dir: str | Path | None = None) -> dict:
     metrics["out_dir"] = str(out)
     with open(out / "metrics.json", "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2, ensure_ascii=False, default=float)
+    if progress:
+        progress("done", {"metrics": metrics, "trajectory": traj[["x", "y", "status", *CORNER_COLS]].to_dict("records")})
     log.info("registered %d/%d, rejected %d, interpolated %d, lost %d -> %s", metrics["n_registered"], n,
              metrics["n_rejected"], metrics["n_interp"], metrics["n_lost"], out)
     return metrics

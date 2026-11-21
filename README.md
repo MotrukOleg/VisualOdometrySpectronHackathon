@@ -15,10 +15,9 @@
 ### Запуск
 
 ```powershell
-$py = "E:\Anaconda\envs\MachineLearning\python.exe"   # або будь-який Python 3.11 із залежностями
-& $py -m pip install -r requirements.txt -r requirements-app.txt   # + requirements-learned.txt для навчених методів
-& $py scripts/download_data.py                        # 50 кадрів і мапа завдання
-& $py -m app                                          # http://127.0.0.1:8080
+& python -m pip install -r requirements.txt -r requirements-app.txt   # + requirements-learned.txt для навчених методів
+& python scripts/download_data.py                        # 50 кадрів і мапа завдання
+& python -m app                                          # http://127.0.0.1:8080
 ```
 
 - **Доступ із телефона чи іншого ПК у локальній мережі:** `& $py -m app --host 0.0.0.0`, далі відкрити
@@ -154,14 +153,3 @@ GIF прискорено втричі.*
 - ORB — найшвидший, ~4 кадр/с;
 - SIFT і AKAZE — ~1–1.5 кадр/с;
 - перший кадр шукається по всій мапі, ~2.5 с.
-
-### Як перезаписати GIF
-
-GIF знято скриптом [scripts/record_app_gifs.mjs](scripts/record_app_gifs.mjs). Він керує headless Edge / Chrome
-через DevTools, записує екран і збирає GIF через `ffmpeg`. Потрібні Node 22, `ffmpeg` у PATH і запущений застосунок.
-
-```powershell
-node scripts/record_app_gifs.mjs                      # усі сценарії -> docs/app/*.gif
-node scripts/record_app_gifs.mjs spoof live           # лише вибрані
-node scripts/record_app_gifs.mjs --encode missions    # перекодувати останній запис без браузера
-```

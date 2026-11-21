@@ -42,6 +42,38 @@
   </aside>
 </section>
 
+<!-- 1b. Team -->
+<section>
+  <div class="kicker">Команда</div>
+  <h2>Хто що робив</h2>
+  <div class="team">
+    <div class="member">
+      <img src="figures/team_motruk.jpg" alt="Олег Мотрук">
+      <div class="name">Олег Мотрук</div>
+      <ul class="roles"><li>тренування моделей</li><li>аналіз помилок</li></ul>
+    </div>
+    <div class="member">
+      <img src="figures/team_maksymiv.jpg" alt="Данило Максимів">
+      <div class="name">Данило Максимів</div>
+      <ul class="roles"><li>розробка застосунку</li><li>спуфінг GPS</li><li>аналіз спотворень</li></ul>
+    </div>
+    <div class="member">
+      <img src="figures/team_shevchenko.jpg" alt="Даниїл Шевченко">
+      <div class="name">Даниїл Шевченко</div>
+      <ul class="roles"><li>розробка застосунку</li><li>аналіз метрик</li></ul>
+    </div>
+    <div class="member">
+      <img src="figures/team_hrechyn.jpg" alt="Андрій Гречин">
+      <div class="name">Андрій Гречин</div>
+      <ul class="roles"><li>донавчання DINOv2</li></ul>
+    </div>
+  </div>
+  <aside class="notes" data-speaker="Людина 4" data-time="0:20">
+    Нас четверо. Олег займався тренуванням моделей і аналізом помилок, Данило — розробкою застосунку, спуфінгом GPS
+    і аналізом спотворень, Даниїл — розробкою застосунку й аналізом метрик, Андрій — донавчанням DINOv2.
+  </aside>
+</section>
+
 <!-- 2. Task + data -->
 <section>
   <div class="kicker">01 · Задача</div>
@@ -359,6 +391,19 @@
     <span data-k="t3_full.rows.3.1"></span> у бейзлайну. На справжньому польоті рятують острови і донавчений DINOv2 —
     за умови відомого масштабу. Візуальна прив'язка ловить підробку GPS, а найсильніше ламають хмари й темрява. Далі — підбір масштабу без GPS, більше справжніх польотів
     для навчання і злиття з одометрією. Дякуємо, готові відповісти на питання.
+  </aside>
+</section>
+
+<!-- Demo of the app (screen recording, 4:27) -->
+<section>
+  <div class="kicker">Демо</div>
+  <h2>Застосунок єДрон у дії</h2>
+  <video class="fig frame demo" controls muted preload="metadata" src="media/9_app_demo.mp4"
+         poster="figures/9_app_demo_poster.jpg"></video>
+  <div class="caption">Запис екрана, 4:27. Місія «Свої дані»: відео з телефона, кожен 5-й кадр (400 кадрів) локалізується
+    бейзлайном SIFT + FLANN на CPU (~2 кадри/с), маршрут наростає на мапі наживо. Запуск: <code>python -m app</code></div>
+  <aside class="notes" data-speaker="—" data-time="(демо)">
+    Демо застосунку: показати запис або запустити застосунок наживо (python -m app).
   </aside>
 </section>
 
